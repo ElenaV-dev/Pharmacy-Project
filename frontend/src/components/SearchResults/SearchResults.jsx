@@ -1,32 +1,49 @@
-import { ShoppingCart, Pill } from 'lucide-react'
+import { ShoppingCart, SearchX } from 'lucide-react'
 
-function SearchResults({ products }) {
+function SearchResults({ products, onSelectProduct, hasSearched }) {
+
+    if (hasSearched && products.length === 0) {
+        return (
+            <div className="no-results">
+                <SearchX size={48} strokeWidth={1.5} />
+                <h3>Ничего не найдено</h3>
+                <p>Попробуйте проверить правильность написания или ввести другое название лекарства.</p>
+            </div>
+        )
+    }
+
+    if (!hasSearched && products.length === 0) {
+        return (
+            <div className="start-screen">
+                <h2>Добро пожаловать в Pharmacy</h2>
+                <p>Воспользуйтесь поиском выше, чтобы найти необходимые медикаменты.</p>
+            </div>
+        )
+    }
+
     return (
         <div className="search-results">
             {products.map((product) => (
                 <div className="product-card" key={product.id}>
-                    {/* Визуальная заглушка под фото лекарства */}
-                    <div className="product-image-placeholder">
-                        <Pill size={32} strokeWidth={1.5} />
-                    </div>
+                      <button
+                          className="product-name"
+                          onClick={() => onSelectProduct(product.id)}
+                      >
+                          {product.name}
+                      </button>
 
-                    <button className="product-name">
-                        {product.name}
-                    </button>
+                       <p className="product-price">
+                           {product.price} ₸
+                       </p>
 
-                    <p className={`product-stock ${product.inStock ? 'in' : 'out'}`}>
-                        {product.inStock ? '✓ В наличии' : 'Нет в наличии'}
-                    </p>
+                       <p className={`product-stock ${product.inStock ? 'in' : 'out'}`}>
+                           {product.inStock ? '✓ Есть в наличии' : 'Нет в наличии'}
+                       </p>
 
-                    <div className="product-footer">
-                        <p className="product-price">
-                            {product.price} ₸
-                        </p>
-                        <button className="cart-button">
-                            <ShoppingCart size={16} />
-                            <span>Купить</span>
-                        </button>
-                    </div>
+                       <button className="cart-button">
+                           <ShoppingCart size={16} />
+                           <span>Купить</span>
+                       </button>
                 </div>
             ))}
         </div>

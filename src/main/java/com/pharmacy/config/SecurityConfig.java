@@ -17,6 +17,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/product/search").permitAll()
+                        .requestMatchers("/api/product/*").permitAll()
                         .anyRequest().authenticated()
                 ).build();
     }

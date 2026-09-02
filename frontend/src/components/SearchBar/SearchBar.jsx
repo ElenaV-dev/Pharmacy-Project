@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 
-function SearchBar({ setProducts }) {
+function SearchBar({ setProducts, onSearchSuccess }) {
     const [searchText, setSearchText] = useState('')
 
     const handleSearch = async (event) => {
         event.preventDefault()
+
+        if (!searchText.trim()) return
 
         const response = await fetch(
             `http://localhost:8080/api/product/search?name=${searchText}`
@@ -14,6 +16,12 @@ function SearchBar({ setProducts }) {
         const data = await response.json()
 
         setProducts(data)
+
+        if (onSearchSuccess) {
+            onSearchSuccess()
+        }
+
+        setSearchText('')
     }
 
     return (

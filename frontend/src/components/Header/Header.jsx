@@ -1,20 +1,32 @@
-import { LayoutGrid, User, ShoppingCart } from 'lucide-react'
+import { LayoutGrid, User, ShoppingCart, ArrowLeft } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
 
-function Header({ setProducts }) {
+function Header({ setProducts, selectedProductId, onLogoClick, onBackClick }) {
+    const isProductPage = selectedProductId !== null
+
     return (
         <header>
             <div className="container header-wrapper">
-                <h1>Pharmacy</h1>
 
-                <nav>
-                    <button className="header-button catalog">
-                        <LayoutGrid size={18} />
-                        <span>Каталог</span>
+                <h1 className="header-logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
+                    Pharmacy
+                </h1>
+
+                {isProductPage ? (
+                    <button className="header-button back-button" onClick={onBackClick}>
+                        <ArrowLeft size={18} />
+                        <span>Назад</span>
                     </button>
-                </nav>
+                ) : (
+                    <nav>
+                        <button className="header-button catalog">
+                            <LayoutGrid size={18} />
+                            <span>Каталог</span>
+                        </button>
+                    </nav>
+                )}
 
-                <SearchBar setProducts={setProducts} />
+                <SearchBar setProducts={setProducts} onSearchSuccess={onBackClick} />
 
                 <div className="user-actions">
                     <button className="header-button">
