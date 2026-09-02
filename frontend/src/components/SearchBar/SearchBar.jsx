@@ -1,11 +1,19 @@
 import { useState } from 'react'
+import { Search } from 'lucide-react'
 
-function SearchBar() {
+function SearchBar({ setProducts }) {
     const [searchText, setSearchText] = useState('')
 
-    const handleSearch = (event) => {
+    const handleSearch = async (event) => {
         event.preventDefault()
-        console.log(searchText)
+
+        const response = await fetch(
+            `http://localhost:8080/api/product/search?name=${searchText}`
+        )
+
+        const data = await response.json()
+
+        setProducts(data)
     }
 
     return (
@@ -22,9 +30,8 @@ function SearchBar() {
                 <button
                     className="search-button"
                     type="submit"
-                    onClick={handleSearch}
                 >
-                 🔍
+                 <Search size={20} />
                 </button>
             </form>
         </div>

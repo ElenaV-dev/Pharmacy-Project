@@ -31,4 +31,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private ProductCategory category;
+
+    @Column(name = "instruction", nullable = false, columnDefinition = "TEXT")
+    private String instructions;
 }
