@@ -3,7 +3,7 @@ import './App.css'
 import Header from './components/Header/Header'
 import SearchResults from './components/SearchResults/SearchResults'
 import ProductPage from './components/ProductPage/ProductPage'
-import CartPage from './components/CartPage/CartPage' // Импортируем будущую страницу корзины
+import CartPage from './components/CartPage/CartPage'
 
 function App() {
     const [products, setProducts] = useState([])
@@ -67,6 +67,13 @@ function App() {
         setIsCartOpen(false)
     }
 
+    const handleCategorySelect = (categoryProducts) => {
+        setProducts(categoryProducts)
+        setHasSearched(true)
+        setSelectedProductId(null)
+        setIsCartOpen(false)
+    }
+
     return (
          <>
             <Header
@@ -80,6 +87,7 @@ function App() {
                     setIsCartOpen(true)
                     setSelectedProductId(null)
                 }}
+                onCategorySelect={handleCategorySelect}
             />
             <main className="container">
                 {isCartOpen ? (

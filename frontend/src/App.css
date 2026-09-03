@@ -165,7 +165,7 @@ header h1:hover {
     border-color: rgba(16, 185, 129, 0.2);
 }
 
-/* Заглушка для фото товара (важно для интернет-аптеки) */
+/* Заглушка для фото товара */
 .product-image-placeholder {
     width: 100%;
     height: 160px;
@@ -614,5 +614,68 @@ header h1:hover {
     margin: 16px 0 8px 0;
     color: var(--text-main);
 }
+
+/* Контейнер для относительного позиционирования */
+.catalog-menu-container {
+    position: relative;
+}
+
+/* Анимация иконки стрелочки на кнопке */
+.catalog-menu-container .chevron {
+    transition: transform 0.2s ease;
+    margin-left: 4px;
+}
+
+.catalog-menu-container .chevron.rotate {
+    transform: rotate(180px);
+}
+
+/* Выпадающее окно */
+.catalog-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 260px;
+    padding: 8px 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInDropdown 0.15s ease-out;
+}
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Элемент списка (категория) */
+.dropdown-item {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.dropdown-loading {
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
 
 
