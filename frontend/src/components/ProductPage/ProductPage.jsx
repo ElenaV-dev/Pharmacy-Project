@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Pill, ShieldCheck, FileText } from 'lucide-react'
 
-function ProductPage({ id }) {
+function ProductPage({ id, onAddToCart }) {
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -62,9 +62,13 @@ function ProductPage({ id }) {
                     </div>
                 </div>
 
-                <button className="product-page-buy-btn" disabled={product.stock === 0}>
-                    {product.stock > 0 ? 'Добавить в корзину' : 'Заказать'}
-                </button>
+                <button
+                            className="product-page-buy-btn"
+                            disabled={product.stock === 0}
+                            onClick={() => onAddToCart(product)}
+                        >
+                            {product.stock > 0 ? 'Добавить в корзину' : 'Заказать'}
+                        </button>
             </div>
         </div>
     )

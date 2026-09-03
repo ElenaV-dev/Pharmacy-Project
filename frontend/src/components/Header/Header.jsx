@@ -1,8 +1,8 @@
 import { LayoutGrid, User, ShoppingCart, ArrowLeft } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
 
-function Header({ setProducts, selectedProductId, onLogoClick, onBackClick }) {
-    const isProductPage = selectedProductId !== null
+function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoClick, onBackClick, onCartClick }) {
+    const showBackButton = selectedProductId !== null || isCartOpen
 
     return (
         <header>
@@ -12,7 +12,7 @@ function Header({ setProducts, selectedProductId, onLogoClick, onBackClick }) {
                     Pharmacy
                 </h1>
 
-                {isProductPage ? (
+                {showBackButton ? (
                     <button className="header-button back-button" onClick={onBackClick}>
                         <ArrowLeft size={18} />
                         <span>Назад</span>
@@ -34,8 +34,11 @@ function Header({ setProducts, selectedProductId, onLogoClick, onBackClick }) {
                         <span>Войти</span>
                     </button>
 
-                    <button className="header-button">
-                        <ShoppingCart size={18} />
+                    <button className="header-button cart-header-btn" onClick={onCartClick}>
+                        <div className="cart-icon-wrapper">
+                            <ShoppingCart size={18} />
+                            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                        </div>
                         <span>Корзина</span>
                     </button>
                 </div>

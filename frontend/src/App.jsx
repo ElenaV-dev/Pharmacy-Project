@@ -1,27 +1,70 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import Header from './components/Header/Header'
 import SearchResults from './components/SearchResults/SearchResults'
 import ProductPage from './components/ProductPage/ProductPage'
+import CartPage from './components/CartPage/CartPage' // Импортируем будущую страницу корзины
 
 function App() {
     const [products, setProducts] = useState([])
     const [selectedProductId, setSelectedProductId] = useState(null)
     const [hasSearched, setHasSearched] = useState(false)
+    const [isCartOpen, setIsCartOpen] = useState(false)
+
+    const [cartItems, setCartItems] = useState(() => {
+        const savedCart = localStorage.getItem('pharmacy_cart')
+        return savedCart ? JSON.parse(savedCart) : []
+    })
+
+    useEffect(() => {
+        localStorage.setItem('pharmacy_cart', JSON.stringify(cartItems))
+    }, [cartItems])
+
+    const handleAddToCart = (product, quantity = 1) => {
+        setCartItems(prevItems => {
+            const existingItem = prevItems.find(item => item.id === product.id)
+
+            if (existingItem) {
+                return prevItems.map(item =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + quantity }
+                        : item
+                )
+            }
+            return [...prevItems, { ...product, quantity }]
+        })
+    }
+
+    const handleUpdateQuantity = (id, newQuantity) => {
+        if (newQuantity <= 0) {
+            handleRemoveFromCart(id)
+            return
+        }
+        setCartItems(prevItems =>
+            prevItems.map(item => item.id === id ? { ...item, quantity: newQuantity } : item)
+        )
+    }
+
+    const handleRemoveFromCart = (id) => {
+        setCartItems(prevItems => prevItems.filter(item => item.id !== id))
+    }
 
     const handleResetToHome = () => {
         setSelectedProductId(null)
         setProducts([])
         setHasSearched(false)
+        setIsCartOpen(false)
     }
 
     const handleBackToResults = () => {
         setSelectedProductId(null)
+        setIsCartOpen(false)
     }
 
     const handleSearchSuccess = () => {
         setHasSearched(true)
-        handleBackToResults()
+        setSelectedProductId(null)
+        setIsCartOpen(false)
     }
 
     return (
@@ -29,17 +72,34 @@ function App() {
             <Header
                 setProducts={setProducts}
                 selectedProductId={selectedProductId}
+                isCartOpen={isCartOpen}
+                cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
                 onLogoClick={handleResetToHome}
-                onBackClick={handleSearchSuccess}
+                onBackClick={handleBackToResults}
+                onCartClick={() => {
+                    setIsCartOpen(true)
+                    setSelectedProductId(null)
+                }}
             />
             <main className="container">
-                {selectedProductId !== null ? (
-                    <ProductPage id={selectedProductId} />
+                {isCartOpen ? (
+                    <CartPage
+                        cartItems={cartItems}
+                        onUpdateQuantity={handleUpdateQuantity}
+                        onRemove={handleRemoveFromCart}
+                        onBack={handleBackToResults}
+                    />
+                ) : selectedProductId !== null ? (
+                    <ProductPage
+                        id={selectedProductId}
+                        onAddToCart={handleAddToCart}
+                    />
                 ) : (
                     <SearchResults
                         products={products}
                         onSelectProduct={setSelectedProductId}
                         hasSearched={hasSearched}
+                        onAddToCart={handleAddToCart}
                     />
                 )}
             </main>

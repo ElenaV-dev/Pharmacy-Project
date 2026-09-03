@@ -1,6 +1,6 @@
 import { ShoppingCart, SearchX } from 'lucide-react'
 
-function SearchResults({ products, onSelectProduct, hasSearched }) {
+function SearchResults({ products, onSelectProduct, hasSearched, onAddToCart }) {
 
     if (hasSearched && products.length === 0) {
         return (
@@ -40,7 +40,11 @@ function SearchResults({ products, onSelectProduct, hasSearched }) {
                            {product.inStock ? '✓ Есть в наличии' : 'Нет в наличии'}
                        </p>
 
-                       <button className="cart-button">
+                       <button
+                           className="cart-button"
+                           onClick={() => onAddToCart(product)}
+                           disabled={!product.inStock}
+                       >
                            <ShoppingCart size={16} />
                            <span>Купить</span>
                        </button>
