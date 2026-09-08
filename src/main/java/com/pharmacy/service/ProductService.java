@@ -30,7 +30,7 @@ public class ProductService {
 
     public ProductResponseDto findById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Продукт не найден с данным id: " + id));
         return productMapper.toResponseDto(product);
     }
 

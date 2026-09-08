@@ -4,12 +4,16 @@ import Header from './components/Header/Header'
 import SearchResults from './components/SearchResults/SearchResults'
 import ProductPage from './components/ProductPage/ProductPage'
 import CartPage from './components/CartPage/CartPage'
+import AuthModal from './components/AuthModal/AuthModal' // Импортируем будущее модальное окно
 
 function App() {
     const [products, setProducts] = useState([])
     const [selectedProductId, setSelectedProductId] = useState(null)
     const [hasSearched, setHasSearched] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
+
+    // НОВОЕ СОСТОЯНИЕ: открыто ли окно авторизации/регистрации
+    const [isAuthOpen, setIsAuthOpen] = useState(false)
 
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('pharmacy_cart')
@@ -23,12 +27,9 @@ function App() {
     const handleAddToCart = (product, quantity = 1) => {
         setCartItems(prevItems => {
             const existingItem = prevItems.find(item => item.id === product.id)
-
             if (existingItem) {
                 return prevItems.map(item =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
+                    item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
                 )
             }
             return [...prevItems, { ...product, quantity }]
@@ -88,7 +89,9 @@ function App() {
                     setSelectedProductId(null)
                 }}
                 onCategorySelect={handleCategorySelect}
+                onAuthClick={() => setIsAuthOpen(true)} // ТУТ: Передаем функцию открытия окна авторизации
             />
+
             <main className="container">
                 {isCartOpen ? (
                     <CartPage
@@ -111,6 +114,9 @@ function App() {
                     />
                 )}
             </main>
+
+            {/* ТУТ: Если флаг true, рендерим модальное окно поверх всего сайта */}
+            {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
          </>
     )
 }

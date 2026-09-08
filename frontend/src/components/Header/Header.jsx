@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, User, ShoppingCart, ArrowLeft, ChevronDown } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
 
-function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoClick, onBackClick, onCartClick, onCategorySelect }) {
+function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoClick,
+    onBackClick, onCartClick, onCategorySelect, onAuthClick }) {
     const isProductPage = selectedProductId !== null
     const showBackButton = selectedProductId !== null || isCartOpen
 
@@ -87,7 +88,7 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoC
                 <SearchBar setProducts={setProducts} onSearchSuccess={onBackClick} />
 
                 <div className="user-actions">
-                    <button className="header-button">
+                    <button className="header-button" onClick={onAuthClick}>
                         <User size={18} />
                         <span>Войти</span>
                     </button>
