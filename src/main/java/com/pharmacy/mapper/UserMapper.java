@@ -1,5 +1,6 @@
 package com.pharmacy.mapper;
 
+import com.pharmacy.dto.user_dto.UserLoginResponseDto;
 import com.pharmacy.dto.user_dto.UserRegisterDto;
 import com.pharmacy.model.User;
 import com.pharmacy.model.UserRole;
@@ -24,5 +25,11 @@ public class UserMapper {
         user.setRole(UserRole.CLIENT);
 
         return user;
+    }
+
+    public UserLoginResponseDto toUserLoginResponseDto(String token) {
+        return UserLoginResponseDto.builder()
+                .token(token)
+                .build();
     }
 }

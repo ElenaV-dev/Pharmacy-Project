@@ -1,5 +1,7 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.dto.user_dto.UserLoginRequestDto;
+import com.pharmacy.dto.user_dto.UserLoginResponseDto;
 import com.pharmacy.dto.user_dto.UserRegisterDto;
 import com.pharmacy.service.UserService;
 import jakarta.validation.Valid;
@@ -20,5 +22,10 @@ public class AuthorizationController {
     @PostMapping("/registration")
     public void registration(@Valid @RequestBody UserRegisterDto dto) {
         userService.registration(dto);
+    }
+
+    @PostMapping("/login")
+    public UserLoginResponseDto login(@Valid @RequestBody UserLoginRequestDto dto) {
+        return userService.login(dto);
     }
 }
