@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, User, ShoppingCart, ArrowLeft, ChevronDown } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
 
-function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoClick,
-    onBackClick, onCartClick, onCategorySelect, onAuthClick }) {
+function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, onLogout,
+    onLogoClick, onBackClick, onCartClick, onCategorySelect, onAuthClick }) {
     const isProductPage = selectedProductId !== null
     const showBackButton = selectedProductId !== null || isCartOpen
 
@@ -34,8 +34,8 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoC
         try {
             const response = await fetch(`http://localhost:8080/api/product/categories/${categoryEnum}`)
             const data = await response.json()
-            onCategorySelect(data) // Передаем товары в App.jsx
-            setIsMenuOpen(false)   // Закрываем меню
+            onCategorySelect(data)
+            setIsMenuOpen(false)
         } catch (error) {
             console.error("Ошибка загрузки товаров категории:", error)
         }
@@ -88,10 +88,17 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, onLogoC
                 <SearchBar setProducts={setProducts} onSearchSuccess={onBackClick} />
 
                 <div className="user-actions">
-                    <button className="header-button" onClick={onAuthClick}>
-                        <User size={18} />
-                        <span>Войти</span>
-                    </button>
+                    {token ? (
+                        <button className="header-button logout-btn" onClick={onLogout}>
+                            <User size={18} />
+                            <span>Выйти</span>
+                        </button>
+                    ) : (
+                        <button className="header-button" onClick={onAuthClick}>
+                            <User size={18} />
+                            <span>Войти</span>
+                        </button>
+                    )}
 
                     <button className="header-button cart-header-btn" onClick={onCartClick}>
                         <div className="cart-icon-wrapper">

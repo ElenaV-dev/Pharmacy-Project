@@ -1,57 +1,77 @@
 import { useState } from 'react'
 import { X, Lock, Mail, User, Eye, EyeOff } from 'lucide-react'
 
-function AuthModal({ onClose }) {
-    const [isLoginMode, setIsLoginMode] = useState(false)
-
-    // Поля формы
+function AuthModal({ onClose, onAuthSuccess }) {
+    const [isLoginMode, setIsLoginMode] = useState(true)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-
-    // Вместо одной строки используем объект для точечных ошибок полей
     const [fieldErrors, setFieldErrors] = useState({})
-    // Общая ошибка на случай падения сервера (500)
     const [generalError, setGeneralError] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [loginEmail, setLoginEmail] = useState('')
+    const [loginPassword, setLoginPassword] = useState('')
+
+    const handleLoginSubmit = async (event) => {
+            event.preventDefault()
+            setFieldErrors({})
+            setGeneralError('')
+            setLoading(true)
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail, password: loginPassword })
+                })
+
+                const data = await response.json().catch(() => null)
+                if (response.ok && data?.token) {
+                    onAuthSuccess(data.token)
+                } else {
+                    if (response.status === 400 && data?.fieldErrors) {
+                        setFieldErrors(data.fieldErrors)
+                    } else {
+                        setGeneralError(data?.message || 'Неверный адрес почты или пароль.')
+                    }
+                }
+            } catch (err) {
+                console.error(err)
+                setGeneralError('Ошибка соединения с сервером.')
+            } finally {
+                setLoading(false)
+            }
+        }
 
     const handleRegisterSubmit = async (event) => {
-        event.preventDefault()
-        setFieldErrors({})
-        setGeneralError('')
-        setSuccessMessage('')
-        setLoading(true)
+            event.preventDefault()
+            setFieldErrors({})
+            setGeneralError('')
+            setLoading(true)
 
-        try {
-            const response = await fetch('http://localhost:8080/api/auth/registration', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, email, password })
-            })
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                })
 
-            const data = await response.json().catch(() => null)
+                const data = await response.json().catch(() => null)
 
-            if (response.ok) {
-                setSuccessMessage('Регистрация прошла успешно! Теперь вы можете войти.')
-                setName('')
-                setEmail('')
-                setPassword('')
+            if (response.ok && data?.token) {
+                onAuthSuccess(data.token)
             } else {
-                if (data && data.fieldErrors && Object.keys(data.fieldErrors).length > 0) {
-                    // Если есть ошибки полей, записываем ТОЛЬКО их. Общую плашку не трогаем!
+                if (data && data.fieldErrors) {
                     setFieldErrors(data.fieldErrors)
                 } else {
-                    // Сюда попадем только если упала критическая ошибка бэкенда (например, базы данных)
-                    setGeneralError(data?.message || 'Ошибка регистрации. Проверьте введенные данные.')
+                    setGeneralError(data?.message || 'Ошибка регистрации.')
                 }
             }
         } catch (err) {
             console.error(err)
-            setGeneralError('Не удалось связаться с сервером. Попробуйте позже.')
+            setGeneralError('Ошибка соединения.')
         } finally {
             setLoading(false)
         }
@@ -80,38 +100,11 @@ function AuthModal({ onClose }) {
                     </button>
                 </div>
 
-                {/* Общая ошибка или сообщение об успехе */}
                 {generalError && <div className="auth-error-alert">{generalError}</div>}
                 {successMessage && <div className="auth-success-alert">{successMessage}</div>}
 
                 {isLoginMode ? (
-                    <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
-                        <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                            Форма входа будет реализована далее.
-                        </p>
-                    </form>
-                ) : (
-                    <form className="auth-form" onSubmit={handleRegisterSubmit} noValidate>
-
-                        {/* ПОЛЕ: ИМЯ */}
-                        <div className="input-group">
-                            <label>Ваше имя</label>
-                            <div className="input-wrapper">
-                                <User className="input-icon" size={18} />
-                                <input
-                                    type="text"
-                                    placeholder="Иван"
-                                    className={fieldErrors.name ? 'input-error' : ''} // Подсветка рамки инпута красным
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            {/* Вывод ошибки строго под инпутом имени */}
-                            {fieldErrors.name && <span className="field-error-text">{fieldErrors.name}</span>}
-                        </div>
-
-                        {/* ПОЛЕ: EMAIL */}
+                    <form className="auth-form" onSubmit={handleLoginSubmit} noValidate>
                         <div className="input-group">
                             <label>Электронная почта</label>
                             <div className="input-wrapper">
@@ -119,17 +112,15 @@ function AuthModal({ onClose }) {
                                 <input
                                     type="email"
                                     placeholder="example@mail.com"
-                                    className={fieldErrors.email ? 'input-error' : ''} // Подсветка рамки инпута красным
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    className={fieldErrors.email ? 'input-error' : ''}
+                                    value={loginEmail}
+                                    onChange={(e) => setLoginEmail(e.target.value)}
                                     required
                                 />
                             </div>
-                            {/* Вывод ошибки строго под инпутом почты */}
                             {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
                         </div>
 
-                        {/* ПОЛЕ: ПАРОЛЬ */}
                         <div className="input-group">
                             <label>Пароль</label>
                             <div className="input-wrapper">
@@ -137,7 +128,71 @@ function AuthModal({ onClose }) {
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
-                                    className={fieldErrors.password ? 'input-error' : ''} // Подсветка рамки инпута красным
+                                    className={fieldErrors.password ? 'input-error' : ''}
+                                    value={loginPassword}
+                                    onChange={(e) => setLoginPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {fieldErrors.password && <span className="field-error-text">{fieldErrors.password}</span>}
+                        </div>
+
+                        {generalError && <div className="auth-error-alert">{generalError}</div>}
+
+                        <button type="submit" className="auth-submit-btn" disabled={loading}>
+                            {loading ? 'Вход в аккаунт...' : 'Войти'}
+                        </button>
+                    </form>
+                ) : (
+                    <form className="auth-form" onSubmit={handleRegisterSubmit} noValidate>
+
+                        <div className="input-group">
+                            <label>Ваше имя</label>
+                            <div className="input-wrapper">
+                                <User className="input-icon" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Иван"
+                                    className={fieldErrors.name ? 'input-error' : ''}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            {fieldErrors.name && <span className="field-error-text">{fieldErrors.name}</span>}
+                        </div>
+
+                        <div className="input-group">
+                            <label>Электронная почта</label>
+                            <div className="input-wrapper">
+                                <Mail className="input-icon" size={18} />
+                                <input
+                                    type="email"
+                                    placeholder="example@mail.com"
+                                    className={fieldErrors.email ? 'input-error' : ''}
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
+                        </div>
+
+                        <div className="input-group">
+                            <label>Пароль</label>
+                            <div className="input-wrapper">
+                                <Lock className="input-icon" size={18} />
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    className={fieldErrors.password ? 'input-error' : ''}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -150,7 +205,6 @@ function AuthModal({ onClose }) {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
-                            {/* Если ошибки нет — показываем обычную подсказку, если есть — текст ошибки красным */}
                             {fieldErrors.password ? (
                                 <span className="field-error-text">{fieldErrors.password}</span>
                             ) : (

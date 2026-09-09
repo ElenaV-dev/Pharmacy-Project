@@ -11,8 +11,6 @@ function App() {
     const [selectedProductId, setSelectedProductId] = useState(null)
     const [hasSearched, setHasSearched] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
-
-    // НОВОЕ СОСТОЯНИЕ: открыто ли окно авторизации/регистрации
     const [isAuthOpen, setIsAuthOpen] = useState(false)
 
     const [cartItems, setCartItems] = useState(() => {
@@ -75,6 +73,19 @@ function App() {
         setIsCartOpen(false)
     }
 
+    const [token, setToken] = useState(() => localStorage.getItem('pharmacy_token') || null)
+
+    const handleLoginSuccess = (receivedToken) => {
+        localStorage.setItem('pharmacy_token', receivedToken)
+        setToken(receivedToken)
+        setIsAuthOpen(false)
+    }
+
+    const handleLogout = () => {
+        localStorage.removeItem('pharmacy_token')
+        setToken(null)
+    }
+
     return (
          <>
             <Header
@@ -82,6 +93,8 @@ function App() {
                 selectedProductId={selectedProductId}
                 isCartOpen={isCartOpen}
                 cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+                token={token}
+                onLogout={handleLogout}
                 onLogoClick={handleResetToHome}
                 onBackClick={handleBackToResults}
                 onCartClick={() => {
@@ -89,7 +102,7 @@ function App() {
                     setSelectedProductId(null)
                 }}
                 onCategorySelect={handleCategorySelect}
-                onAuthClick={() => setIsAuthOpen(true)} // ТУТ: Передаем функцию открытия окна авторизации
+                onAuthClick={() => setIsAuthOpen(true)}
             />
 
             <main className="container">
@@ -115,8 +128,12 @@ function App() {
                 )}
             </main>
 
-            {/* ТУТ: Если флаг true, рендерим модальное окно поверх всего сайта */}
-            {isAuthOpen && <AuthModal onClose={() => setIsAuthOpen(false)} />}
+            {isAuthOpen && (
+                <AuthModal
+                    onClose={() => setIsAuthOpen(false)}
+                    onAuthSuccess={handleLoginSuccess}
+                />
+            )}
          </>
     )
 }
