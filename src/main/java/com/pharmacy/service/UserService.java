@@ -32,14 +32,26 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public void registration(UserRegisterDto dto) {
+    public UserLoginResponseDto registration(UserRegisterDto dto) {
         userValidator.validateRegisterDto(dto);
         User user = userMapper.UserRegisterDtoToEntity(dto);
         userRepository.save(user);
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.getEmail(),
+                        dto.getPassword()
+                )
+        );
+
+        String token = jwtService.generateToken(authentication);
+
         log.info("New user registered: id={}, email={}, role={}",
                 user.getId(),
                 user.getEmail(),
                 user.getRole());
+
+        return userMapper.toUserLoginResponseDto(token);
     }
 
     public UserLoginResponseDto login(UserLoginRequestDto dto) {

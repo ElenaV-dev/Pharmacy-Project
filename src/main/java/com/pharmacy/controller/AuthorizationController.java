@@ -20,8 +20,8 @@ public class AuthorizationController {
     }
 
     @PostMapping("/registration")
-    public void registration(@Valid @RequestBody UserRegisterDto dto) {
-        userService.registration(dto);
+    public UserLoginResponseDto registration(@Valid @RequestBody UserRegisterDto dto) {
+        return userService.registration(dto);
     }
 
     @PostMapping("/login")
