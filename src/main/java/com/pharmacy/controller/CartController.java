@@ -20,4 +20,9 @@ public class CartController {
     public CartResponseDto merge(@Valid @RequestBody CartRequestDto dto) {
         return cartService.merge(dto);
     }
+
+    @GetMapping
+    public CartResponseDto getCart() {
+        return cartService.getCart();
+    }
 }

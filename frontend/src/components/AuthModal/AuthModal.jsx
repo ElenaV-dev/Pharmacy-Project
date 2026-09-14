@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { X, Lock, Mail, User, Eye, EyeOff } from 'lucide-react'
 
-function AuthModal({ onClose, onAuthSuccess }) {
-    const [isLoginMode, setIsLoginMode] = useState(true)
+function AuthModal({ onClose, onAuthSuccess, initialMode = 'login' }) {
+    const [isLoginMode, setIsLoginMode] = useState(initialMode === 'login')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -15,50 +15,50 @@ function AuthModal({ onClose, onAuthSuccess }) {
     const [loginPassword, setLoginPassword] = useState('')
 
     const handleLoginSubmit = async (event) => {
-            event.preventDefault()
-            setFieldErrors({})
-            setGeneralError('')
-            setLoading(true)
+        event.preventDefault()
+        setFieldErrors({})
+        setGeneralError('')
+        setLoading(true)
 
-            try {
-                const response = await fetch('http://localhost:8080/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: loginEmail, password: loginPassword })
-                })
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: loginEmail, password: loginPassword })
+            })
 
-                const data = await response.json().catch(() => null)
-                if (response.ok && data?.token) {
-                    onAuthSuccess(data.token)
+            const data = await response.json().catch(() => null)
+            if (response.ok && data?.token) {
+                onAuthSuccess(data.token)
+            } else {
+                if (response.status === 400 && data?.fieldErrors) {
+                    setFieldErrors(data.fieldErrors)
                 } else {
-                    if (response.status === 400 && data?.fieldErrors) {
-                        setFieldErrors(data.fieldErrors)
-                    } else {
-                        setGeneralError(data?.message || 'Неверный адрес почты или пароль.')
-                    }
+                    setGeneralError(data?.message || 'Неверный адрес почты или пароль.')
                 }
-            } catch (err) {
-                console.error(err)
-                setGeneralError('Ошибка соединения с сервером.')
-            } finally {
-                setLoading(false)
             }
+        } catch (err) {
+            console.error(err)
+            setGeneralError('Ошибка соединения с сервером.')
+        } finally {
+            setLoading(false)
         }
+    }
 
     const handleRegisterSubmit = async (event) => {
-            event.preventDefault()
-            setFieldErrors({})
-            setGeneralError('')
-            setLoading(true)
+        event.preventDefault()
+        setFieldErrors({})
+        setGeneralError('')
+        setLoading(true)
 
-            try {
-                const response = await fetch('http://localhost:8080/api/auth/registration', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                })
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/registration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            })
 
-                const data = await response.json().catch(() => null)
+            const data = await response.json().catch(() => null)
 
             if (response.ok && data?.token) {
                 onAuthSuccess(data.token)
@@ -144,8 +144,6 @@ function AuthModal({ onClose, onAuthSuccess }) {
                             {fieldErrors.password && <span className="field-error-text">{fieldErrors.password}</span>}
                         </div>
 
-                        {generalError && <div className="auth-error-alert">{generalError}</div>}
-
                         <button type="submit" className="auth-submit-btn" disabled={loading}>
                             {loading ? 'Вход в аккаунт...' : 'Войти'}
                         </button>
@@ -205,11 +203,7 @@ function AuthModal({ onClose, onAuthSuccess }) {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
-                            {fieldErrors.password ? (
-                                <span className="field-error-text">{fieldErrors.password}</span>
-                            ) : (
-                                <span className="input-hint">Минимум 8 символов: заглавная, строчная буква и цифра</span>
-                            )}
+                            {fieldErrors.password && <span className="field-error-text">{fieldErrors.password}</span>}
                         </div>
 
                         <button type="submit" className="auth-submit-btn" disabled={loading}>

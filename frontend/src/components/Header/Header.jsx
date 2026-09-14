@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, User, ShoppingCart, ArrowLeft, ChevronDown } from 'lucide-react'
 import SearchBar from '../SearchBar/SearchBar'
 
-function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, onLogout,
-    onLogoClick, onBackClick, onCartClick, onCategorySelect, onAuthClick }) {
-    const isProductPage = selectedProductId !== null
-    const showBackButton = selectedProductId !== null || isCartOpen
+function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, onLogout, onLogoClick, onBackClick, onCartClick, onCategorySelect, onAuthClick, onSearchSuccess }) {
 
+    const showBackButton = !token ? (selectedProductId !== null || isCartOpen) : (selectedProductId !== null)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [categories, setCategories] = useState([])
     const menuRef = useRef(null)
@@ -70,22 +68,25 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
                                 {categories.length === 0 ? (
                                     <div className="dropdown-loading">Загрузка...</div>
                                 ) : (
-                                    categories.map((cat) => (
-                                        <button
-                                            key={cat.category}
-                                            className="dropdown-item"
-                                            onClick={() => handleCategoryClick(cat.category)}
-                                        >
-                                            {cat.name}
-                                        </button>
-                                    ))
+                                    categories.map((cat) => {
+                                        const categoryKey = cat.category || cat.id || cat.name;
+                                        return (
+                                            <button
+                                                key={categoryKey}
+                                                className="dropdown-item"
+                                                onClick={() => handleCategoryClick(categoryKey)}
+                                            >
+                                                {cat.name}
+                                            </button>
+                                        )
+                                    })
                                 )}
                             </div>
                         )}
                     </div>
                 )}
 
-                <SearchBar setProducts={setProducts} onSearchSuccess={onBackClick} />
+                <SearchBar setProducts={setProducts} onSearchSuccess={onSearchSuccess} />
 
                 <div className="user-actions">
                     {token ? (
@@ -94,19 +95,21 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
                             <span>Выйти</span>
                         </button>
                     ) : (
-                        <button className="header-button" onClick={onAuthClick}>
-                            <User size={18} />
-                            <span>Войти</span>
-                        </button>
-                    )}
+                        <>
+                            <button className="header-button" onClick={onAuthClick}>
+                                <User size={18} />
+                                <span>Войти</span>
+                            </button>
 
-                    <button className="header-button cart-header-btn" onClick={onCartClick}>
-                        <div className="cart-icon-wrapper">
-                            <ShoppingCart size={18} />
-                            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-                        </div>
-                        <span>Корзина</span>
-                    </button>
+                            <button className="header-button cart-header-btn" onClick={onCartClick}>
+                                <div className="cart-icon-wrapper">
+                                    <ShoppingCart size={18} />
+                                    {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                                </div>
+                                <span>Корзина</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </header>

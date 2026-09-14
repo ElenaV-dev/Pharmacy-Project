@@ -1,6 +1,6 @@
 import { Plus, Minus, Trash2, ShoppingBag } from 'lucide-react'
 
-function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack }) {
+function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack, onCheckout }) {
 
     const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
@@ -8,18 +8,21 @@ function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack }) {
         return (
             <div className="empty-cart">
                 <ShoppingBag size={64} strokeWidth={1} />
-                <h2>Ваша корзина пуста</h2>
+                <h2>{onBack ? "Ваша корзина пуста" : "Ваш список покупок пуст"}</h2>
                 <p>Добавьте лекарства из поиска или каталога, чтобы оформить заказ.</p>
-                <button className="header-button catalog" style={{ marginTop: '20px' }} onClick={onBack}>
-                    Перейти к поиску
-                </button>
+
+                {onBack && (
+                    <button className="header-button catalog" style={{ marginTop: '20px' }} onClick={onBack}>
+                        Перейти к поиску
+                    </button>
+                )}
             </div>
         )
     }
 
     return (
         <div className="cart-page-container">
-            <h2>Корзина покупок</h2>
+            <h2>{onBack ? "Корзина покупок" : "Личный кабинет"}</h2>
 
             <div className="cart-content">
                 <div className="cart-items-list">
@@ -63,9 +66,12 @@ function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack }) {
                         <span>Сумма к оплате:</span>
                         <span>{totalPrice} ₸</span>
                     </div>
-                    <button className="checkout-btn">
-                        Оформить заказ
-                    </button>
+                    <button
+                            className="checkout-btn"
+                            onClick={onCheckout}
+                        >
+                            Оформить заказ
+                        </button>
                 </div>
             </div>
         </div>

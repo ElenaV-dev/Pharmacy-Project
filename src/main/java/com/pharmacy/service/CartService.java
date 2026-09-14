@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -89,5 +90,24 @@ public class CartService {
         }
         cartRepository.save(cart);
         return cartMapper.toCartResponseDto(cart);
+    }
+
+    @Transactional(readOnly = true)
+    public CartResponseDto getCart() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+
+        Optional<Cart> cart = cartRepository.findByUserId(user.getId());
+
+        if (cart.isEmpty()) {
+            return CartResponseDto.builder()
+                    .items(List.of())
+                    .build();
+        }
+
+        return cartMapper.toCartResponseDto(cart.get());
     }
 }
