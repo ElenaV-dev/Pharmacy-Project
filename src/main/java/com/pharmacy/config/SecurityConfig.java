@@ -3,6 +3,7 @@ package com.pharmacy.config;
 import com.pharmacy.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,9 +35,17 @@ public class SecurityConfig {
                 .cors(cors -> {
                 })
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/product/search").permitAll()
-                        .requestMatchers("/api/product/*").permitAll()
-                        .requestMatchers("/api/product/categories/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/product/search").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/product/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/product/categories/*").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/cart").hasAnyRole("CLIENT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/cart/merge").hasAnyRole("CLIENT", "ADMIN")
+
                         .requestMatchers("/api/auth/*").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

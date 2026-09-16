@@ -1,7 +1,6 @@
 package com.pharmacy.validator;
 
 import com.pharmacy.exception.ValidationException;
-import com.pharmacy.model.CartItem;
 import com.pharmacy.model.Product;
 import org.springframework.stereotype.Component;
 

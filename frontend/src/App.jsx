@@ -5,6 +5,7 @@ import SearchResults from './components/SearchResults/SearchResults'
 import ProductPage from './components/ProductPage/ProductPage'
 import CartPage from './components/CartPage/CartPage'
 import AuthModal from './components/AuthModal/AuthModal'
+import PharmacistPage from './components/PharmacistPage/PharmacistPage'
 
 function App() {
     const [products, setProducts] = useState([])
@@ -12,10 +13,10 @@ function App() {
     const [hasSearched, setHasSearched] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
     const [isAuthOpen, setIsAuthOpen] = useState(false)
-    const [token, setToken] = useState(() => localStorage.getItem('pharmacy_token') || null)
     const [isCheckoutWarningOpen, setIsCheckoutWarningOpen] = useState(false)
     const [authInitialMode, setAuthInitialMode] = useState('login')
-
+    const [token, setToken] = useState(() => localStorage.getItem('pharmacy_token') || null)
+    const [userRole, setUserRole] = useState(() => localStorage.getItem('pharmacy_role') || null)
 
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('pharmacy_cart')
@@ -27,7 +28,7 @@ function App() {
     }, [cartItems])
 
     useEffect(() => {
-        if (token) {
+        if (token && userRole === 'CLIENT') {
             fetch('http://localhost:8080/api/cart', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -48,7 +49,7 @@ function App() {
             })
             .catch(err => console.error(err))
         }
-    }, [token])
+    }, [token, userRole])
 
     const handleAddToCart = (product, quantity = 1) => {
         setCartItems(prevItems => {
@@ -101,13 +102,15 @@ function App() {
         setIsCartOpen(false)
     }
 
-    const handleLoginSuccess = async (receivedToken) => {
+    const handleLoginSuccess = async (receivedToken, receivedRole) => {
         localStorage.setItem('pharmacy_token', receivedToken)
+        localStorage.setItem('pharmacy_role', receivedRole)
         setToken(receivedToken)
+        setUserRole(receivedRole)
         setIsAuthOpen(false)
         setHasSearched(false)
 
-        if (cartItems.length > 0) {
+        if (receivedRole === 'CLIENT' && cartItems.length > 0) {
             try {
                 const dtoList = cartItems.map(item => ({
                     productId: item.id,
@@ -141,11 +144,12 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem('pharmacy_token')
         localStorage.removeItem('pharmacy_cart')
+        localStorage.removeItem('pharmacy_role')
         setToken(null)
+        setUserRole(null)
         setCartItems([])
-        setSelectedProductId(null)
-        setIsCartOpen(false)
         setHasSearched(false)
+        setProducts([])
     }
 
     return (
@@ -156,6 +160,7 @@ function App() {
                 isCartOpen={isCartOpen}
                 cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
                 token={token}
+                userRole={userRole}
                 onLogout={handleLogout}
                 onLogoClick={handleResetToHome}
                 onBackClick={handleBackToResults}
@@ -165,98 +170,60 @@ function App() {
                 }}
                 onCategorySelect={handleCategorySelect}
                 onAuthClick={() => setIsAuthOpen(true)}
-                onSearchSuccess={handleSearchSuccess} // Передаем сброс для поиска
+                onSearchSuccess={handleSearchSuccess}
             />
 
             <main className="container">
-                {token ? (
-                    selectedProductId !== null ? (
-                        <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
-                    ) :
-
+                {token && userRole === 'PHARMACIST' ? (
+                    <PharmacistPage
+                        token={token}
+                        products={products}
+                        setProducts={setProducts}
+                    />
+                ) :
+                token && userRole === 'CLIENT' ? (
                     hasSearched ? (
-                        <SearchResults
-                            products={products}
-                            onSelectProduct={setSelectedProductId}
-                            hasSearched={hasSearched}
-                            onAddToCart={handleAddToCart}
-                        />
+                        selectedProductId !== null ? (
+                            <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
+                        ) : (
+                            <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
+                        )
                     ) : (
-                        <CartPage
-                            cartItems={cartItems}
-                            onUpdateQuantity={handleUpdateQuantity}
-                            onRemove={handleRemoveFromCart}
-                            onBack={null} // Передаем null, чтобы скрыть гостевые кнопки
-                        />
+                        <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={null} />
                     )
                 ) : (
                     isCartOpen ? (
-                        <CartPage
-                            cartItems={cartItems}
-                            onUpdateQuantity={handleUpdateQuantity}
-                            onRemove={handleRemoveFromCart}
-                            onBack={handleBackToResults}
-                            onCheckout={() => setIsCheckoutWarningOpen(true)}
-                        />
+                        <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={handleBackToResults} onCheckout={() => setIsCheckoutWarningOpen(true)} />
                     ) : selectedProductId !== null ? (
                         <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
                     ) : (
-                        <SearchResults
-                            products={products}
-                            onSelectProduct={setSelectedProductId}
-                            hasSearched={hasSearched}
-                            onAddToCart={handleAddToCart}
-                        />
+                        <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     )
                 )}
             </main>
 
-                    {isCheckoutWarningOpen && (
-                        <div className="modal-overlay" onClick={() => setIsCheckoutWarningOpen(false)}>
-                            <div className="modal-content text-center" onClick={(e) => e.stopPropagation()}>
-                                <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-main)' }}>
-                                    Оформление заказа
-                                </h3>
-                                <p style={{ fontSize: '15px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.5' }}>
-                                    Для того, чтобы оформить заказ, необходимо Войти или Зарегистрироваться.
-                                </p>
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                                    <button
-                                        className="auth-submit-btn"
-                                        style={{ margin: 0, padding: '10px 24px' }}
-                                        onClick={() => {
-                                            setIsCheckoutWarningOpen(false);
-                                            setAuthInitialMode('login');
-                                            setIsAuthOpen(true);
-                                        }}
-                                    >
-                                        Войти
-                                    </button>
-                                    <button
-                                        className="header-button catalog"
-                                        style={{ margin: 0, padding: '10px 24px' }}
-                                        onClick={() => {
-                                            setIsCheckoutWarningOpen(false);
-                                            setAuthInitialMode('register');
-                                            setIsAuthOpen(true);
-                                        }}
-                                    >
-                                        Зарегистрироваться
-                                    </button>
-                                </div>
-                            </div>
+            {isCheckoutWarningOpen && (
+                <div className="modal-overlay" onClick={() => setIsCheckoutWarningOpen(false)}>
+                    <div className="modal-content text-center" onClick={(e) => e.stopPropagation()}>
+                        <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-main)' }}>Оформление заказа</h3>
+                        <p style={{ fontSize: '15px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.5' }}>
+                            Для того, чтобы оформить заказ, необходимо Войти или Зарегистрироваться.
+                        </p>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                            <button className="auth-submit-btn" style={{ margin: 0, padding: '10px 24px' }} onClick={() => { setIsCheckoutWarningOpen(false); setAuthInitialMode('login'); setIsAuthOpen(true); }}>Войти</button>
+                            <button className="header-button catalog" style={{ margin: 0, padding: '10px 24px' }} onClick={() => { setIsCheckoutWarningOpen(false); setAuthInitialMode('register'); setIsAuthOpen(true); }}>Зарегистрироваться</button>
                         </div>
-                    )}
+                    </div>
+                </div>
+            )}
 
-                    {isAuthOpen && (
-                        <AuthModal
-                            onClose={() => setIsAuthOpen(false)}
-                            onAuthSuccess={handleLoginSuccess}
-                            initialMode={authInitialMode}
-                        />
-                    )}
-         </>
-    )
-}
-
+            {isAuthOpen && (
+                <AuthModal
+                    onClose={() => setIsAuthOpen(false)}
+                    onAuthSuccess={handleLoginSuccess}
+                    initialMode={authInitialMode}
+                />
+            )}
+        </>
+    )}
 export default App

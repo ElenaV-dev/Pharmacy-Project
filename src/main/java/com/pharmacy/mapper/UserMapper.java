@@ -27,9 +27,10 @@ public class UserMapper {
         return user;
     }
 
-    public UserLoginResponseDto toUserLoginResponseDto(String token) {
+    public UserLoginResponseDto toUserLoginResponseDto(String token, UserRole role) {
         return UserLoginResponseDto.builder()
                 .token(token)
+                .role(role)
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import com.pharmacy.dto.user_dto.UserLoginResponseDto;
 import com.pharmacy.dto.user_dto.UserRegisterDto;
 import com.pharmacy.mapper.UserMapper;
 import com.pharmacy.model.User;
+import com.pharmacy.model.UserRole;
 import com.pharmacy.repository.UserRepository;
 import com.pharmacy.security.JwtService;
 import com.pharmacy.validator.UserValidator;
@@ -51,7 +52,7 @@ public class UserService {
                 user.getEmail(),
                 user.getRole());
 
-        return userMapper.toUserLoginResponseDto(token);
+        return userMapper.toUserLoginResponseDto(token, user.getRole());
     }
 
     public UserLoginResponseDto login(UserLoginRequestDto dto) {
@@ -64,6 +65,13 @@ public class UserService {
 
         String token = jwtService.generateToken(authentication);
 
-        return userMapper.toUserLoginResponseDto(token);
+        UserRole role = UserRole.valueOf(authentication.getAuthorities()
+                        .iterator()
+                        .next()
+                        .getAuthority()
+                        .replace("ROLE_", "")
+        );
+
+        return userMapper.toUserLoginResponseDto(token, role);
     }
 }

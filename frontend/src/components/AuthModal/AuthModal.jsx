@@ -29,7 +29,7 @@ function AuthModal({ onClose, onAuthSuccess, initialMode = 'login' }) {
 
             const data = await response.json().catch(() => null)
             if (response.ok && data?.token) {
-                onAuthSuccess(data.token)
+                onAuthSuccess(data.token, data.role)
             } else {
                 if (response.status === 400 && data?.fieldErrors) {
                     setFieldErrors(data.fieldErrors)
@@ -61,7 +61,7 @@ function AuthModal({ onClose, onAuthSuccess, initialMode = 'login' }) {
             const data = await response.json().catch(() => null)
 
             if (response.ok && data?.token) {
-                onAuthSuccess(data.token)
+                onAuthSuccess(data.token, data.role)
             } else {
                 if (data && data.fieldErrors) {
                     setFieldErrors(data.fieldErrors)

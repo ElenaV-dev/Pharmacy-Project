@@ -1,7 +1,6 @@
 package com.pharmacy.mapper;
 
-import com.pharmacy.dto.product_dto.ProductResponseDto;
-import com.pharmacy.dto.product_dto.ProductSearchResponseDto;
+import com.pharmacy.dto.product_dto.*;
 import com.pharmacy.model.Product;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,9 @@ public class ProductMapper {
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
-                product.getStock() > 0
+                product.getStock() > 0,
+                product.getStock(),
+                product.getInstructions()
         );
     }
 
@@ -31,6 +32,37 @@ public class ProductMapper {
                 product.getName(),
                 product.getPrice(),
                 product.getStock(),
+                product.getInstructions()
+        );
+    }
+
+    public Product productCreateDtoToEntity(ProductCreateRequestDto dto) {
+        Product product = new Product();
+
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setCategory(dto.getCategory());
+        product.setInstructions(dto.getInstruction());
+
+        return product;
+    }
+
+    public void updateEntityFromDto(Product product, ProductUpdateDto dto) {
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        product.setCategory(dto.getCategory());
+        product.setInstructions(dto.getInstruction());
+    }
+
+    public ProductCreateResponseDto toProductCreateResponseDto(Product product) {
+        return new ProductCreateResponseDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStock(),
+                product.getCategory(),
                 product.getInstructions()
         );
     }

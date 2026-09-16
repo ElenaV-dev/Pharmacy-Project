@@ -12,4 +12,6 @@ public class ProductSearchResponseDto {
     private String name;
     private BigDecimal price;
     private boolean inStock;
+    private Integer stock;
+    private String instruction;
 }

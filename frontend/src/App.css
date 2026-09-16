@@ -899,6 +899,193 @@ header h1:hover {
     box-shadow: 0 0 0 4px #fee2e2;
 }
 
+/* --- СТИЛИ РАБОЧЕГО МЕСТА ФАРМАЦЕВТА --- */
+.pharmacist-page {
+    margin-top: 32px;
+}
+
+.pharmacist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.pharmacist-header h2 {
+    font-size: 26px;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.add-product-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.add-product-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Состояние пустой страницы управления */
+.pharmacist-empty-state {
+    background-color: var(--bg-card);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pharmacist-empty-state p {
+    max-width: 450px;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-top: 12px;
+}
+
+/* Таблица админки */
+.table-responsive {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.pharmacist-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 15px;
+}
+
+.pharmacist-table th {
+    background-color: var(--bg-page);
+    padding: 16px 24px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.pharmacist-table td {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.pharmacist-table tr:last-child td {
+    border-bottom: none;
+}
+
+.pharmacist-table tr:hover td {
+    background-color: rgba(249, 250, 251, 0.6);
+}
+
+.prod-name-cell {
+    font-weight: 600;
+}
+
+/* Индикаторы остатка товара */
+.stock-indicator {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.stock-indicator.good {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.stock-indicator.empty {
+    background-color: #fef2f2;
+    color: #ef4444;
+}
+
+/* Кнопки действий внутри таблицы */
+.table-actions-wrapper {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.action-inline-btn {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.action-inline-btn.edit {
+    color: var(--text-main);
+}
+
+.action-inline-btn.edit:hover {
+    background-color: var(--bg-page);
+    border-color: var(--text-muted);
+}
+
+.action-inline-btn.delete {
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+
+.action-inline-btn.delete:hover {
+    background-color: #fef2f2;
+    border-color: #fca5a5;
+}
+
+/* Стилизация текстового поля textarea для инструкции */
+.crud-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 14px 12px 42px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-page);
+    resize: vertical;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.crud-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: var(--bg-card);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.modal-crud-title {
+    margin: 0 0 20px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+
 
 
 

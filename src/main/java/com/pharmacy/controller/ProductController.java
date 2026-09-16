@@ -1,10 +1,9 @@
 package com.pharmacy.controller;
 
-import com.pharmacy.dto.product_dto.CategoryResponseDto;
-import com.pharmacy.dto.product_dto.ProductResponseDto;
-import com.pharmacy.dto.product_dto.ProductSearchResponseDto;
+import com.pharmacy.dto.product_dto.*;
 import com.pharmacy.model.ProductCategory;
 import com.pharmacy.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,5 +35,22 @@ public class ProductController {
     @GetMapping("/categories/{category}")
     public List<ProductSearchResponseDto> getProductsByCategory(@PathVariable ProductCategory category) {
         return productService.searchProductsByCategory(category);
+    }
+
+    @PostMapping
+    public ProductCreateResponseDto createProduct(@Valid @RequestBody ProductCreateRequestDto dto) {
+        return productService.create(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ProductCreateResponseDto updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductUpdateDto dto) {
+       return productService.update(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        productService.deleteById(id);
     }
 }
