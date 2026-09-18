@@ -1,8 +1,7 @@
 package com.pharmacy.service;
 
-import com.pharmacy.dto.user_dto.UserLoginRequestDto;
-import com.pharmacy.dto.user_dto.UserLoginResponseDto;
-import com.pharmacy.dto.user_dto.UserRegisterDto;
+import com.pharmacy.dto.user_dto.*;
+import com.pharmacy.exception.EntityNotFoundException;
 import com.pharmacy.mapper.UserMapper;
 import com.pharmacy.model.User;
 import com.pharmacy.model.UserRole;
@@ -14,6 +13,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -73,5 +75,41 @@ public class UserService {
         );
 
         return userMapper.toUserLoginResponseDto(token, role);
+    }
+
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toUserResponseDtoList(users);
+    }
+
+    public UserResponseDto createUser(UserCreateDto dto) {
+        userValidator.validateCreateDto(dto);
+        User user = userMapper.userCreateDtoToEntity(dto);
+        userRepository.save(user);
+        log.info("New user created: email={}, role={}", user.getEmail(), user.getRole());
+
+        return userMapper.toUserResponseDto(user);
+    }
+
+    public UserResponseDto updateUser(Long id, UserUpdateDto dto) {
+        userValidator.validateUpdateDto(dto, id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден с данным id: " + id));
+
+        userMapper.updateEntityFromDto(user, dto);
+        userRepository.save(user);
+        log.info("User updated: id={}, email={}", user.getId(), user.getEmail());
+
+        return userMapper.toUserResponseDto(user);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден с данным id: " + id));
+
+        userRepository.delete(user);
+        log.info("User deleted: id={}, email={}", user.getId(), user.getEmail());
     }
 }

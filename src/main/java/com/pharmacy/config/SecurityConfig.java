@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/cart").hasAnyRole("CLIENT", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/cart/merge").hasAnyRole("CLIENT", "ADMIN")
 
+                        .requestMatchers("/api/user/**").hasRole("ADMIN")
+
                         .requestMatchers("/api/auth/*").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

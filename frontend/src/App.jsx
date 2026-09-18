@@ -6,6 +6,7 @@ import ProductPage from './components/ProductPage/ProductPage'
 import CartPage from './components/CartPage/CartPage'
 import AuthModal from './components/AuthModal/AuthModal'
 import PharmacistPage from './components/PharmacistPage/PharmacistPage'
+import AdminPage from './components/AdminPage/AdminPage'
 
 function App() {
     const [products, setProducts] = useState([])
@@ -22,6 +23,27 @@ function App() {
         const savedCart = localStorage.getItem('pharmacy_cart')
         return savedCart ? JSON.parse(savedCart) : []
     })
+
+    const saveCartToServer = async (currentItems, currentToken) => {
+            if (!currentToken) return
+            try {
+                const dtoList = currentItems.map(item => ({
+                    productId: item.id,
+                    quantity: item.quantity
+                }))
+
+                await fetch('http://localhost:8080/api/cart/merge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify({ items: dtoList })
+                })
+            } catch (error) {
+                        console.error("Не удалось сохранить корзину на сервере:", error)
+                    }
+                }
 
     useEffect(() => {
         localStorage.setItem('pharmacy_cart', JSON.stringify(cartItems))
@@ -52,30 +74,55 @@ function App() {
     }, [token, userRole])
 
     const handleAddToCart = (product, quantity = 1) => {
-        setCartItems(prevItems => {
-            const existingItem = prevItems.find(item => item.id === product.id)
-            if (existingItem) {
-                return prevItems.map(item =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
-                )
-            }
-            return [...prevItems, { ...product, quantity }]
-        })
-    }
+            setCartItems(prevItems => {
+                const existingItem = prevItems.find(item => item.id === product.id)
+                let updatedItems
+
+                if (existingItem) {
+                    updatedItems = prevItems.map(item =>
+                        item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+                    )
+                } else {
+                    updatedItems = [...prevItems, { ...product, quantity }]
+                }
+
+                if (token && userRole === 'CLIENT') {
+                    saveCartToServer(updatedItems, token)
+                }
+
+                return updatedItems
+            })
+        }
 
     const handleUpdateQuantity = (id, newQuantity) => {
-        if (newQuantity <= 0) {
-            handleRemoveFromCart(id)
-            return
+            if (newQuantity <= 0) {
+                handleRemoveFromCart(id)
+                return
+            }
+            setCartItems(prevItems => {
+                const updatedItems = prevItems.map(item =>
+                    item.id === id ? { ...item, quantity: newQuantity } : item
+                )
+
+                if (token && userRole === 'CLIENT') {
+                    saveCartToServer(updatedItems, token)
+                }
+
+                return updatedItems
+            })
         }
-        setCartItems(prevItems =>
-            prevItems.map(item => item.id === id ? { ...item, quantity: newQuantity } : item)
-        )
-    }
 
     const handleRemoveFromCart = (id) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id))
-    }
+            setCartItems(prevItems => {
+                const updatedItems = prevItems.filter(item => item.id !== id)
+
+                if (token && userRole === 'CLIENT') {
+                    saveCartToServer(updatedItems, token)
+                }
+
+                return updatedItems
+            })
+        }
 
     const handleResetToHome = () => {
         setSelectedProductId(null)
@@ -167,6 +214,7 @@ function App() {
                 onCartClick={() => {
                     setIsCartOpen(true)
                     setSelectedProductId(null)
+                    setHasSearched(false);
                 }}
                 onCategorySelect={handleCategorySelect}
                 onAuthClick={() => setIsAuthOpen(true)}
@@ -174,33 +222,36 @@ function App() {
             />
 
             <main className="container">
-                {token && userRole === 'PHARMACIST' ? (
-                    <PharmacistPage
-                        token={token}
-                        products={products}
-                        setProducts={setProducts}
-                    />
-                ) :
-                token && userRole === 'CLIENT' ? (
+                {token ? (
+                    userRole === 'ADMIN' ? (
+                        <AdminPage token={token} />
+                    ) :
+                    userRole === 'PHARMACIST' ? (
+                        <PharmacistPage token={token} products={products} setProducts={setProducts} />
+                    ) :
+                    selectedProductId !== null ? (
+                        <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
+                    ) :
                     hasSearched ? (
-                        selectedProductId !== null ? (
-                            <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
-                        ) : (
-                            <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
-                        )
+                        <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     ) : (
                         <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={null} />
                     )
                 ) : (
+                    selectedProductId !== null ? (
+                        <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
+                    ) :
                     isCartOpen ? (
                         <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={handleBackToResults} onCheckout={() => setIsCheckoutWarningOpen(true)} />
-                    ) : selectedProductId !== null ? (
-                        <ProductPage id={selectedProductId} onAddToCart={handleAddToCart} />
+                    ) :
+                    hasSearched ? (
+                        <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     ) : (
                         <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     )
                 )}
             </main>
+
 
             {isCheckoutWarningOpen && (
                 <div className="modal-overlay" onClick={() => setIsCheckoutWarningOpen(false)}>
@@ -226,4 +277,5 @@ function App() {
             )}
         </>
     )}
+
 export default App
