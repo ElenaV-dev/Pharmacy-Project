@@ -11,10 +11,10 @@ import lombok.*;
 @Builder
 public class CartItemRequestDto {
 
-    @NotNull
+    @NotNull(message = "Id продукта обязательно для заполнения")
     private Long productId;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "Количество обязательно для заполнения")
+    @Positive(message = "Количество должно быть больше 0")
     private Integer quantity;
 }

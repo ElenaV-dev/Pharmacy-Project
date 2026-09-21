@@ -11,6 +11,7 @@ public class CartItemMapper {
 
     public CartItemResponseDto toCartItemResponseDto(CartItem cartItem) {
         return new CartItemResponseDto(
+                cartItem.getId(),
                 cartItem.getProduct().getId(),
                 cartItem.getProduct().getName(),
                 cartItem.getProduct().getPrice(),

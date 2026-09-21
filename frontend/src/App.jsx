@@ -7,6 +7,7 @@ import CartPage from './components/CartPage/CartPage'
 import AuthModal from './components/AuthModal/AuthModal'
 import PharmacistPage from './components/PharmacistPage/PharmacistPage'
 import AdminPage from './components/AdminPage/AdminPage'
+import ClientPage from './components/ClientPage/ClientPage' // Импортируем новую страницу клиента
 
 function App() {
     const [products, setProducts] = useState([])
@@ -24,27 +25,6 @@ function App() {
         return savedCart ? JSON.parse(savedCart) : []
     })
 
-    const saveCartToServer = async (currentItems, currentToken) => {
-            if (!currentToken) return
-            try {
-                const dtoList = currentItems.map(item => ({
-                    productId: item.id,
-                    quantity: item.quantity
-                }))
-
-                await fetch('http://localhost:8080/api/cart/merge', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${currentToken}`
-                    },
-                    body: JSON.stringify({ items: dtoList })
-                })
-            } catch (error) {
-                        console.error("Не удалось сохранить корзину на сервере:", error)
-                    }
-                }
-
     useEffect(() => {
         localStorage.setItem('pharmacy_cart', JSON.stringify(cartItems))
     }, [cartItems])
@@ -55,74 +35,110 @@ function App() {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-            .then(res => {
-                if (res.ok) return res.json()
-                throw new Error("Не удалось загрузить корзину")
-            })
+            .then(res => res.ok ? res.json() : null)
             .then(userCart => {
-                const formattedItems = userCart.items.map(item => ({
-                    id: item.productId,
-                    name: item.productName,
-                    price: item.price,
-                    quantity: item.quantity,
-                    inStock: true
-                }))
-                setCartItems(formattedItems)
+                if (userCart) {
+                    const formattedItems = userCart.items.map(item => ({
+                        id: item.id || item.cartItemId,
+                        productId: item.productId, // сохраняем ID товара
+                        name: item.productName,
+                        price: item.price,
+                        quantity: item.quantity
+                    }))
+                    setCartItems(formattedItems)
+                }
             })
-            .catch(err => console.error(err))
-        }
-    }, [token, userRole])
+        .catch(err => console.error(err))
+                }
+            }, [token, userRole])
 
-    const handleAddToCart = (product, quantity = 1) => {
-            setCartItems(prevItems => {
-                const existingItem = prevItems.find(item => item.id === product.id)
-                let updatedItems
+    const handleAddToCart = async (product, quantity = 1) => {
+        const existingItem = cartItems.find(item => item.productId === product.id)
 
+        if (token && userRole === 'CLIENT') {
+            try {
                 if (existingItem) {
-                    updatedItems = prevItems.map(item =>
-                        item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
-                    )
-                } else {
-                    updatedItems = [...prevItems, { ...product, quantity }]
+                    handleUpdateQuantity(existingItem.id, existingItem.quantity + quantity)
+                    return
                 }
 
-                if (token && userRole === 'CLIENT') {
-                    saveCartToServer(updatedItems, token)
-                }
+    const response = await fetch('http://localhost:8080/api/cart/items', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            productId: product.id,
+            quantity: quantity
+        })
+    })
+        if (response.ok) {
+            const newCartItem = await response.json()
+            setCartItems(prev => [...prev, {
+                id: newCartItem.id || newCartItem.cartItemId,
+                productId: newCartItem.productId,
+                name: newCartItem.productName,
+                price: newCartItem.price,
+                quantity: newCartItem.quantity
+            }])
+        }
+    } catch (error) {
+        console.error("Ошибка при добавлении товара на сервер:", error)
+    }
+} else {
+    setCartItems(prevItems => {
+        const guestItem = prevItems.find(item => item.productId === product.id)
+        if (guestItem) {
+            return prevItems.map(item =>
+                item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item
+            )
+        }
+        return [...prevItems, { id: product.id, productId: product.id, name: product.name, price: product.price, quantity }]
+        })
+    }
+}
 
-                return updatedItems
-            })
+    const handleUpdateQuantity = async (id, newQuantity) => {
+        if (newQuantity <= 0) {
+            handleRemoveFromCart(id)
+            return
         }
 
-    const handleUpdateQuantity = (id, newQuantity) => {
-            if (newQuantity <= 0) {
-                handleRemoveFromCart(id)
-                return
+        setCartItems(prevItems =>
+            prevItems.map(item => item.id === id ? { ...item, quantity: newQuantity } : item)
+        )
+
+        if (token && userRole === 'CLIENT') {
+            try {
+                await fetch(`http://localhost:8080/api/cart/items/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ quantity: newQuantity })
+                })
+            } catch (error) {
+                console.error("Ошибка при обновлении количества:", error)
             }
-            setCartItems(prevItems => {
-                const updatedItems = prevItems.map(item =>
-                    item.id === id ? { ...item, quantity: newQuantity } : item
-                )
-
-                if (token && userRole === 'CLIENT') {
-                    saveCartToServer(updatedItems, token)
-                }
-
-                return updatedItems
-            })
         }
+    }
 
-    const handleRemoveFromCart = (id) => {
-            setCartItems(prevItems => {
-                const updatedItems = prevItems.filter(item => item.id !== id)
+    const handleRemoveFromCart = async (id) => {
+        setCartItems(prevItems => prevItems.filter(item => item.id !== id))
 
-                if (token && userRole === 'CLIENT') {
-                    saveCartToServer(updatedItems, token)
-                }
-
-                return updatedItems
-            })
+        if (token && userRole === 'CLIENT') {
+            try {
+                await fetch(`http://localhost:8080/api/cart/items/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            } catch (error) {
+                console.error("Ошибка при удалении товара:", error)
+            }
         }
+    }
 
     const handleResetToHome = () => {
         setSelectedProductId(null)
@@ -163,7 +179,7 @@ function App() {
                     productId: item.id,
                     quantity: item.quantity
                 }))
-                const response = await fetch('http://localhost:8080/api/cart/merge', {
+                await fetch('http://localhost:8080/api/cart/merge', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -171,19 +187,10 @@ function App() {
                     },
                     body: JSON.stringify({ items: dtoList })
                 })
-                if (response.ok) {
-                    const mergedCart = await response.json()
-                    const formattedItems = mergedCart.items.map(item => ({
-                        id: item.productId,
-                        name: item.productName,
-                        price: item.price,
-                        quantity: item.quantity,
-                        inStock: true
-                    }))
-                    setCartItems(formattedItems)
-                }
+                localStorage.removeItem('pharmacy_cart')
+                setCartItems([])
             } catch (error) {
-                console.error(error)
+                console.error("Ошибка слияния корзин:", error)
             }
         }
     }
@@ -192,11 +199,15 @@ function App() {
         localStorage.removeItem('pharmacy_token')
         localStorage.removeItem('pharmacy_cart')
         localStorage.removeItem('pharmacy_role')
+
         setToken(null)
         setUserRole(null)
         setCartItems([])
-        setHasSearched(false)
         setProducts([])
+
+        setSelectedProductId(null)
+        setHasSearched(false)
+        setIsCartOpen(false)
     }
 
     return (
@@ -212,8 +223,8 @@ function App() {
                 onLogoClick={handleResetToHome}
                 onBackClick={handleBackToResults}
                 onCartClick={() => {
-                    setIsCartOpen(true)
-                    setSelectedProductId(null)
+                    setIsCartOpen(true);
+                    setSelectedProductId(null);
                     setHasSearched(false);
                 }}
                 onCategorySelect={handleCategorySelect}
@@ -235,7 +246,11 @@ function App() {
                     hasSearched ? (
                         <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     ) : (
-                        <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={null} />
+                        <ClientPage
+                            cartItems={cartItems}
+                            onUpdateQuantity={handleUpdateQuantity}
+                            onRemove={handleRemoveFromCart}
+                        />
                     )
                 ) : (
                     selectedProductId !== null ? (
@@ -243,15 +258,11 @@ function App() {
                     ) :
                     isCartOpen ? (
                         <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onBack={handleBackToResults} onCheckout={() => setIsCheckoutWarningOpen(true)} />
-                    ) :
-                    hasSearched ? (
-                        <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     ) : (
                         <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     )
                 )}
             </main>
-
 
             {isCheckoutWarningOpen && (
                 <div className="modal-overlay" onClick={() => setIsCheckoutWarningOpen(false)}>
@@ -269,13 +280,10 @@ function App() {
             )}
 
             {isAuthOpen && (
-                <AuthModal
-                    onClose={() => setIsAuthOpen(false)}
-                    onAuthSuccess={handleLoginSuccess}
-                    initialMode={authInitialMode}
-                />
+                <AuthModal onClose={() => setIsAuthOpen(false)} onAuthSuccess={handleLoginSuccess} initialMode={authInitialMode} />
             )}
-        </>
-    )}
+         </>
+    )
+}
 
 export default App

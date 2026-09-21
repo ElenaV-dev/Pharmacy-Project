@@ -8,21 +8,20 @@ function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack, onCheckout })
         return (
             <div className="empty-cart">
                 <ShoppingBag size={64} strokeWidth={1} />
-                <h2>{onBack ? "Ваша корзина пуста" : "Ваш список покупок пуст"}</h2>
+                {/* Убрали проверку: гость всегда видит этот текст */}
+                <h2>Ваша корзина пуста</h2>
                 <p>Добавьте лекарства из поиска или каталога, чтобы оформить заказ.</p>
 
-                {onBack && (
-                    <button className="header-button catalog" style={{ marginTop: '20px' }} onClick={onBack}>
-                        Перейти к поиску
-                    </button>
-                )}
+                <button className="header-button catalog" style={{ marginTop: '20px' }} onClick={onBack}>
+                    Перейти к поиску
+                </button>
             </div>
         )
     }
 
     return (
         <div className="cart-page-container">
-            <h2>{onBack ? "Корзина покупок" : "Личный кабинет"}</h2>
+            <h2>Корзина покупок</h2>
 
             <div className="cart-content">
                 <div className="cart-items-list">
@@ -66,12 +65,13 @@ function CartPage({ cartItems, onUpdateQuantity, onRemove, onBack, onCheckout })
                         <span>Сумма к оплате:</span>
                         <span>{totalPrice} ₸</span>
                     </div>
+
                     <button
-                            className="checkout-btn"
-                            onClick={onCheckout}
-                        >
-                            Оформить заказ
-                        </button>
+                        className="checkout-btn"
+                        onClick={onCheckout}
+                    >
+                        Оформить заказ
+                    </button>
                 </div>
             </div>
         </div>
