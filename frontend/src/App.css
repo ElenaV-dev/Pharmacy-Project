@@ -1085,6 +1085,13 @@ header h1:hover {
     color: var(--text-main);
 }
 
+/* Подсветка карточки товара, которого не хватило на складе */
+.item-out-of-stock-border {
+    border: 2px solid #ef4444 !important;
+    background-color: #fef2f2 !important;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+}
 
 
 

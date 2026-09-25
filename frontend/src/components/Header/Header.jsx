@@ -54,7 +54,7 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
                         <span>Назад</span>
                     </button>
                 ) : (
-                    !isPharmacist && !isAdmin && (
+                    !isAdmin && (
                         <div className="catalog-menu-container" ref={menuRef}>
                             <button
                                 className={`header-button catalog ${isMenuOpen ? 'active' : ''}`}
@@ -65,60 +65,60 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
                                 <ChevronDown size={14} className={`chevron ${isMenuOpen ? 'rotate' : ''}`} />
                             </button>
 
-                    {isMenuOpen && (
-                        <div className="catalog-dropdown">
-                            {categories.length === 0 ? (
-                                <div className="dropdown-loading">Загрузка...</div>
-                            ) : (
-                                categories.map((cat) => {
-                                    const categoryKey = cat.category || cat.id || cat.name;
-                                    return (
-                                        <button
-                                        key={categoryKey}
-                                        className="dropdown-item"
-                                        onClick={() => handleCategoryClick(categoryKey)}
-                                    >
-                                        {cat.name}
-                                    </button>
-                                )
-                            })
-                        )}
-                    </div>
+                            {isMenuOpen && (
+                                <div className="catalog-dropdown">
+                                    {categories.length === 0 ? (
+                                        <div className="dropdown-loading">Загрузка...</div>
+                                    ) : (
+                                        categories.map((cat) => {
+                                            const categoryKey = cat.category || cat.id || cat.name;
+                                            return (
+                                                <button
+                                                    key={categoryKey}
+                                                    className="dropdown-item"
+                                                    onClick={() => handleCategoryClick(categoryKey)}
+                                                >
+                                                    {cat.name}
+                                                </button>
+                                            )
+                                        })
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )
                 )}
-            </div>
-        )
-    )}
 
-    {!isPharmacist && !isAdmin && (
-        <SearchBar setProducts={setProducts} onSearchSuccess={onSearchSuccess} />
-    )}
+                {!isPharmacist && !isAdmin && (
+                    <SearchBar setProducts={setProducts} onSearchSuccess={onSearchSuccess} />
+                )}
 
-    <div className="user-actions">
-        {token && (
-            <button className="header-button logout-btn" onClick={onLogout}>
-                <User size={18} />
-                <span>Выйти</span>
-            </button>
-        )}
+                <div className="user-actions">
+                    {token && (
+                        <button className="header-button logout-btn" onClick={onLogout}>
+                            <User size={18} />
+                            <span>Выйти</span>
+                        </button>
+                    )}
 
-        {!token && (
-            <button className="header-button" onClick={onAuthClick}>
-                <User size={18} />
-                <span>Войти</span>
-            </button>
-        )}
+                    {!token && (
+                        <button className="header-button" onClick={onAuthClick}>
+                            <User size={18} />
+                            <span>Войти</span>
+                        </button>
+                    )}
 
-        {!isPharmacist && !isAdmin && (
-            <button className="header-button cart-header-btn" onClick={onCartClick}>
-                <div className="cart-icon-wrapper">
-                    <ShoppingCart size={18} />
-                    {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                    {!isPharmacist && !isAdmin && (
+                        <button className="header-button cart-header-btn" onClick={onCartClick}>
+                            <div className="cart-icon-wrapper">
+                                <ShoppingCart size={18} />
+                                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                            </div>
+                            <span>Корзина</span>
+                        </button>
+                    )}
                 </div>
-            <span>Корзина</span>
-        </button>
-    )}
-</div>
-    </div>
+            </div>
         </header>
     )
 }

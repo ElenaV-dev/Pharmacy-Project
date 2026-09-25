@@ -7,7 +7,7 @@ import CartPage from './components/CartPage/CartPage'
 import AuthModal from './components/AuthModal/AuthModal'
 import PharmacistPage from './components/PharmacistPage/PharmacistPage'
 import AdminPage from './components/AdminPage/AdminPage'
-import ClientPage from './components/ClientPage/ClientPage' // Импортируем новую страницу клиента
+import ClientPage from './components/ClientPage/ClientPage'
 
 function App() {
     const [products, setProducts] = useState([])
@@ -26,8 +26,10 @@ function App() {
     })
 
     useEffect(() => {
-        localStorage.setItem('pharmacy_cart', JSON.stringify(cartItems))
-    }, [cartItems])
+        if (!token) {
+            localStorage.setItem('pharmacy_cart', JSON.stringify(cartItems))
+        }
+    }, [cartItems, token])
 
     useEffect(() => {
         if (token && userRole === 'CLIENT') {
@@ -40,105 +42,141 @@ function App() {
                 if (userCart) {
                     const formattedItems = userCart.items.map(item => ({
                         id: item.id || item.cartItemId,
-                        productId: item.productId, // сохраняем ID товара
+                        productId: item.productId,
                         name: item.productName,
                         price: item.price,
-                        quantity: item.quantity
+                        quantity: item.quantity,
+                        stock: item.stock
                     }))
                     setCartItems(formattedItems)
                 }
             })
-        .catch(err => console.error(err))
-                }
-            }, [token, userRole])
+            .catch(err => console.error(err))
+        }
+    }, [token, userRole])
 
-    const handleAddToCart = async (product, quantity = 1) => {
-        const existingItem = cartItems.find(item => item.productId === product.id)
+    useEffect(() => {
+        if (!token) {
+            fetch('http://localhost:8080/api/products', {
+                method: 'GET'
+            })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => {
+                setProducts(data);
+            })
+        .catch(err => console.error("Ошибка сброса каталога при выходе:", err));
+        }
+    }, [token]);
+
+    const syncQuantityWithServer = async (cartItemId, newQuantity) => {
+        if (!token || userRole !== 'CLIENT') return null
+        try {
+            const response = await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ quantity: newQuantity })
+            })
+
+            if (response.ok) {
+                return await response.json()
+            } else {
+                const errorData = await response.json().catch(() => null)
+                console.warn("Бэкенд отклонил превышение склада при изменении количества.");
+                return null
+            }
+        } catch (error) {
+            console.error("Ошибка синхронизации количества:", error)
+            return null
+        }
+    }
+
+    const deleteFromServer = async (cartItemId) => {
+        if (!token || userRole !== 'CLIENT') return
+        try {
+            await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+        } catch (error) {
+            console.error("Ошибка удаления с сервера:", error)
+        }
+    }
+
+    const handleAddToCart = async (product) => {
+        const existingItem = cartItems.find(item => item.productId === product.id);
+
+        if (existingItem) {
+            onUpdateQuantity(existingItem.id, existingItem.quantity + 1);
+            return;
+        }
 
         if (token && userRole === 'CLIENT') {
             try {
-                if (existingItem) {
-                    handleUpdateQuantity(existingItem.id, existingItem.quantity + quantity)
-                    return
-                }
-
-    const response = await fetch('http://localhost:8080/api/cart/items', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            productId: product.id,
-            quantity: quantity
-        })
-    })
-        if (response.ok) {
-            const newCartItem = await response.json()
-            setCartItems(prev => [...prev, {
-                id: newCartItem.id || newCartItem.cartItemId,
-                productId: newCartItem.productId,
-                name: newCartItem.productName,
-                price: newCartItem.price,
-                quantity: newCartItem.quantity
-            }])
-        }
-    } catch (error) {
-        console.error("Ошибка при добавлении товара на сервер:", error)
-    }
-} else {
-    setCartItems(prevItems => {
-        const guestItem = prevItems.find(item => item.productId === product.id)
-        if (guestItem) {
-            return prevItems.map(item =>
-                item.productId === product.id ? { ...item, quantity: item.quantity + quantity } : item
-            )
-        }
-        return [...prevItems, { id: product.id, productId: product.id, name: product.name, price: product.price, quantity }]
-        })
-    }
-}
-
-    const handleUpdateQuantity = async (id, newQuantity) => {
-        if (newQuantity <= 0) {
-            handleRemoveFromCart(id)
-            return
-        }
-
-        setCartItems(prevItems =>
-            prevItems.map(item => item.id === id ? { ...item, quantity: newQuantity } : item)
-        )
-
-        if (token && userRole === 'CLIENT') {
-            try {
-                await fetch(`http://localhost:8080/api/cart/items/${id}`, {
-                    method: 'PUT',
+                const response = await fetch('http://localhost:8080/api/cart/items', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ quantity: newQuantity })
-                })
+                    body: JSON.stringify({
+                        productId: product.id,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    const createdItemDto = await response.json();
+
+                    const newItem = {
+                        id: createdItemDto.id,
+                        productId: createdItemDto.productId,
+                        name: createdItemDto.productName,
+                        price: createdItemDto.price,
+                        quantity: createdItemDto.quantity,
+                        stock: createdItemDto.stock
+                    };
+
+                    setCartItems(prev => [...prev, newItem]);
+                } else {
+                    console.error("Сервер отклонил добавление товара в корзину");
+                }
             } catch (error) {
-                console.error("Ошибка при обновлении количества:", error)
+                console.error("Ошибка при добавлении товара:", error);
             }
+        } else {
+            const newGuestItem = {
+                id: Date.now(),
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                stock: product.stock
+            };
+        setCartItems(prev => [...prev, newGuestItem]);
+        }
+    };
+
+    const handleUpdateQuantity = async (cartItemId, newQuantity) => {
+        const updatedItemFromServer = await syncQuantityWithServer(cartItemId, newQuantity)
+
+        if (updatedItemFromServer) {
+            setCartItems(prev => prev.map(item =>
+                item.id === cartItemId ? {
+                    ...item,
+                    quantity: updatedItemFromServer.quantity,
+                    stock: updatedItemFromServer.stock
+                } : item
+            ))
         }
     }
 
-    const handleRemoveFromCart = async (id) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id))
-
-        if (token && userRole === 'CLIENT') {
-            try {
-                await fetch(`http://localhost:8080/api/cart/items/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-            } catch (error) {
-                console.error("Ошибка при удалении товара:", error)
-            }
+    const handleRemoveFromCart = (cartItemId) => {
+            setCartItems(prev => prev.filter(item => item.id !== cartItemId))
+            deleteFromServer(cartItemId)
         }
-    }
 
     const handleResetToHome = () => {
         setSelectedProductId(null)
@@ -247,6 +285,7 @@ function App() {
                         <SearchResults products={products} onSelectProduct={setSelectedProductId} hasSearched={hasSearched} onAddToCart={handleAddToCart} />
                     ) : (
                         <ClientPage
+                            token={token}
                             cartItems={cartItems}
                             onUpdateQuantity={handleUpdateQuantity}
                             onRemove={handleRemoveFromCart}

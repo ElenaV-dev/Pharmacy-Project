@@ -15,7 +15,8 @@ public class CartItemMapper {
                 cartItem.getProduct().getId(),
                 cartItem.getProduct().getName(),
                 cartItem.getProduct().getPrice(),
-                cartItem.getQuantity()
+                cartItem.getQuantity(),
+                cartItem.getProduct().getStock()
         );
     }
 

@@ -18,7 +18,6 @@ public class CartItemValidator {
     }
 
     public void validateQuantity(Integer quantity, Product product) {
-
         if (quantity > product.getStock()) {
             throw new ValidationException("quantity", "Only " + product.getStock() + " items are available");
         }
