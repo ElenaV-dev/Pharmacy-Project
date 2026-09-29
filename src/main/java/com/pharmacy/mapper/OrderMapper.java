@@ -1,5 +1,6 @@
 package com.pharmacy.mapper;
 
+import com.pharmacy.dto.order_dto.OrderAdminResponseDto;
 import com.pharmacy.dto.order_dto.OrderClientResponseDto;
 import com.pharmacy.model.Order;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,23 @@ public class OrderMapper {
     public List<OrderClientResponseDto> toOrderClientResponseDtoList(List<Order> orders) {
         return orders.stream()
                 .map(this::toOrderClientResponseDto)
+                .toList();
+    }
+
+    public OrderAdminResponseDto toOrderAdminResponseDto(Order order) {
+        return OrderAdminResponseDto.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .name(order.getUser().getName())
+                .orderDate(order.getOrderDate())
+                .totalPrice(order.getTotalPrice())
+                .status(order.getStatus())
+                .build();
+    }
+
+    public List<OrderAdminResponseDto> toOrderAdminResponseDtoList(List<Order> orders) {
+        return orders.stream()
+                .map(this::toOrderAdminResponseDto)
                 .toList();
     }
 }

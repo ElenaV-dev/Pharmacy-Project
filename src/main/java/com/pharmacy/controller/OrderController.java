@@ -1,11 +1,11 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.dto.order_dto.OrderAdminResponseDto;
 import com.pharmacy.dto.order_dto.OrderClientResponseDto;
+import com.pharmacy.dto.order_dto.OrderStatusUpdateDto;
 import com.pharmacy.service.OrderService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,5 +27,18 @@ public class OrderController {
     @GetMapping
     public List<OrderClientResponseDto> getOrders() {
         return orderService.getCurrentUserOrders();
+    }
+
+    @GetMapping("/admin")
+    public List<OrderAdminResponseDto> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    @PutMapping("/{id}/status")
+    public OrderAdminResponseDto updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody OrderStatusUpdateDto dto) {
+
+        return orderService.updateStatus(id, dto);
     }
 }

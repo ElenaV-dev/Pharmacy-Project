@@ -1,6 +1,8 @@
 package com.pharmacy.service;
 
+import com.pharmacy.dto.order_dto.OrderAdminResponseDto;
 import com.pharmacy.dto.order_dto.OrderClientResponseDto;
+import com.pharmacy.dto.order_dto.OrderStatusUpdateDto;
 import com.pharmacy.exception.EntityNotFoundException;
 import com.pharmacy.mapper.OrderMapper;
 import com.pharmacy.model.*;
@@ -109,6 +111,37 @@ public class OrderService {
 
         List<Order> orders = orderRepository.findByUserId(user.getId());
         return orderMapper.toOrderClientResponseDtoList(orders);
+    }
+
+    public List<OrderAdminResponseDto> getAllOrders() {
+        List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        return orderMapper.toOrderAdminResponseDtoList(orders);
+    }
+
+    @Transactional
+    public OrderAdminResponseDto updateStatus(Long id, OrderStatusUpdateDto dto) {
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
+
+        OrderStatus currentStatus = order.getStatus();
+        OrderStatus newStatus = dto.getStatus();
+        orderValidator.validateOrderTransition(currentStatus, newStatus);
+
+        if (currentStatus == OrderStatus.PROCESSING && newStatus == OrderStatus.CANCELED) {
+            for (OrderItem item : order.getOrderItems()) {
+                Product product = productRepository.findById(item.getProduct().getId())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Product not found: " + item.getProduct().getName()));
+
+                product.setStock(product.getStock() + item.getQuantity());
+                productRepository.save(product);
+            }
+        }
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        return orderMapper.toOrderAdminResponseDto(order);
     }
 
     private BigDecimal countTotalPrice(List<CartItem> items) {
