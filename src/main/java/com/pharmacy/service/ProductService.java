@@ -36,8 +36,7 @@ public class ProductService {
     }
 
     public ProductResponseDto findById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Продукт не найден с данным id: " + id));
+        Product product = getProductById(id);
         return productMapper.toResponseDto(product);
     }
 
@@ -67,10 +66,7 @@ public class ProductService {
 
     public ProductCreateResponseDto update(Long id, ProductUpdateDto dto) {
         productValidator.validateUpdateDto(id, dto);
-
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Продукт не найден с данным id: " + id));
-
+        Product product = getProductById(id);
         productMapper.updateEntityFromDto(product, dto);
         productRepository.save(product);
         log.info("Product updated: id={}, name={}", product.getId(), product.getName());
@@ -80,11 +76,14 @@ public class ProductService {
 
     @Transactional
     public void deleteById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Продукт не найден с данным id: " + id));
-
+        Product product = getProductById(id);
         cartItemRepository.deleteAllByProductId(id);
         productRepository.delete(product);
         log.info("Product deleted: id={}, name={}", product.getId(), product.getName());
+    }
+
+    private Product getProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
     }
 }

@@ -34,26 +34,22 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
-    private final CartItemMapper cartItemMapper;
     private final CartMapper cartMapper;
 
-    public CartService(CartValidator cartValidator, UserRepository userRepository, CartRepository cartRepository, ProductRepository productRepository, CartItemRepository cartItemRepository, CartItemMapper cartItemMapper, CartMapper cartMapper) {
+    public CartService(CartValidator cartValidator, UserRepository userRepository, CartRepository cartRepository, ProductRepository productRepository, CartItemRepository cartItemRepository, CartMapper cartMapper) {
         this.cartValidator = cartValidator;
         this.userRepository = userRepository;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
         this.cartItemRepository = cartItemRepository;
-        this.cartItemMapper = cartItemMapper;
         this.cartMapper = cartMapper;
     }
 
     @Transactional
     public CartResponseDto merge(CartRequestDto dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
@@ -105,11 +101,8 @@ public class CartService {
     @Transactional(readOnly = true)
     public CartResponseDto getCart() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
         Optional<Cart> cart = cartRepository.findByUserId(user.getId());
 
         if (cart.isEmpty()) {
@@ -125,5 +118,10 @@ public class CartService {
                 cart.get().getCartItems().size());
 
         return cartMapper.toCartResponseDto(cart.get());
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

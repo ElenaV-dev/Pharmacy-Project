@@ -47,10 +47,8 @@ public class CartItemService {
     public CartItemResponseDto createCartItem(CartItemRequestDto dto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
@@ -100,16 +98,10 @@ public class CartItemService {
     public CartItemResponseDto updateQuantity(Long cartItemId, CartItemUpdateDto dto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart item not found with id " + cartItemId));
-
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
+        CartItem cartItem = getCartItemById(cartItemId);
         cartItemValidator.validateOwnership(cartItem, user);
-
         Product product = cartItem.getProduct();
         Integer quantity = dto.getQuantity();
         cartItemValidator.validateQuantity(quantity, product);
@@ -126,16 +118,21 @@ public class CartItemService {
     public void deleteById(Long cartItemId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart item not found with id " + cartItemId));
-
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
+        CartItem cartItem = getCartItemById(cartItemId);
         cartItemValidator.validateOwnership(cartItem, user);
         cartItemRepository.delete(cartItem);
         log.info("Cart item deleted: cart_item_id={}", cartItemId);
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    private CartItem getCartItemById(Long id) {
+        return cartItemRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cart item not found with id " + id));
     }
 }

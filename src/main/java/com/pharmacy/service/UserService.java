@@ -39,14 +39,7 @@ public class UserService {
         userValidator.validateRegisterDto(dto);
         User user = userMapper.UserRegisterDtoToEntity(dto);
         userRepository.save(user);
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        dto.getEmail(),
-                        dto.getPassword()
-                )
-        );
-
+        Authentication authentication = authenticateUser(dto.getEmail(), dto.getPassword());
         String token = jwtService.generateToken(authentication);
 
         log.info("New user registered: id={}, email={}, role={}",
@@ -58,24 +51,10 @@ public class UserService {
     }
 
     public UserLoginResponseDto login(UserLoginRequestDto dto) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        dto.getEmail(),
-                        dto.getPassword()
-                )
-        );
-
+        Authentication authentication = authenticateUser(dto.getEmail(), dto.getPassword());
         String token = jwtService.generateToken(authentication);
-
         log.info("User logged in: email={}", dto.getEmail());
-
-        UserRole role = UserRole.valueOf(authentication.getAuthorities()
-                        .iterator()
-                        .next()
-                        .getAuthority()
-                        .replace("ROLE_", "")
-        );
-
+        UserRole role = getUserRole(authentication);
         return userMapper.toUserLoginResponseDto(token, role);
     }
 
@@ -96,10 +75,7 @@ public class UserService {
 
     public UserResponseDto updateUser(Long id, UserUpdateDto dto) {
         userValidator.validateUpdateDto(dto, id);
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден с данным id: " + id));
-
+        User user = getUserById(id);
         userMapper.updateEntityFromDto(user, dto);
         userRepository.save(user);
         log.info("User updated: id={}, email={}", user.getId(), user.getEmail());
@@ -109,10 +85,26 @@ public class UserService {
 
     @Transactional
     public void deleteById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден с данным id: " + id));
-
+        User user = getUserById(id);
         userRepository.delete(user);
         log.info("User deleted: id={}, email={}", user.getId(), user.getEmail());
+    }
+
+    private Authentication authenticateUser(String email, String password) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+    }
+
+    private User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    }
+
+    private UserRole getUserRole(Authentication authentication) {
+        return UserRole.valueOf(authentication.getAuthorities()
+                .iterator()
+                .next()
+                .getAuthority()
+                .replace("ROLE_", ""));
     }
 }

@@ -52,10 +52,8 @@ public class OrderService {
     public OrderClientResponseDto createOrder() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found with user id " + user.getId()));
@@ -103,12 +101,8 @@ public class OrderService {
 
     public List<OrderClientResponseDto> getCurrentUserOrders() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-
-
+        String email = authentication.getName();
+        User user = getUserByEmail(email);
         List<Order> orders = orderRepository.findByUserId(user.getId());
         log.info("Retrieved {} orders for user_id={}", orders.size(), user.getId());
         return orderMapper.toOrderClientResponseDtoList(orders);
@@ -176,5 +170,10 @@ public class OrderService {
         } while (orderRepository.existsByOrderNumber(orderNumber));
 
         return orderNumber;
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }
