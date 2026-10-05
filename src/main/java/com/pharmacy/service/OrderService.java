@@ -110,11 +110,13 @@ public class OrderService {
 
 
         List<Order> orders = orderRepository.findByUserId(user.getId());
+        log.info("Retrieved {} orders for user_id={}", orders.size(), user.getId());
         return orderMapper.toOrderClientResponseDtoList(orders);
     }
 
     public List<OrderAdminResponseDto> getAllOrders() {
         List<Order> orders = orderRepository.findAllByOrderByOrderDateDesc();
+        log.info("Retrieved {} orders for admin", orders.size());
         return orderMapper.toOrderAdminResponseDtoList(orders);
     }
 
@@ -136,11 +138,16 @@ public class OrderService {
 
                 product.setStock(product.getStock() + item.getQuantity());
                 productRepository.save(product);
+
+                log.debug("Stock restored: product_id={}, quantity={}", product.getId(), item.getQuantity());
             }
         }
         order.setStatus(newStatus);
         orderRepository.save(order);
 
+        log.info("Order status updated: order_id={}, old_status={}, new_status={}",
+                id, currentStatus, newStatus);
+        
         return orderMapper.toOrderAdminResponseDto(order);
     }
 

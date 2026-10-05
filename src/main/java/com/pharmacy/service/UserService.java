@@ -67,6 +67,8 @@ public class UserService {
 
         String token = jwtService.generateToken(authentication);
 
+        log.info("User logged in: email={}", dto.getEmail());
+
         UserRole role = UserRole.valueOf(authentication.getAuthorities()
                         .iterator()
                         .next()
@@ -79,6 +81,7 @@ public class UserService {
 
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
+        log.info("Retrieved {} users", users.size());
         return userMapper.toUserResponseDtoList(users);
     }
 

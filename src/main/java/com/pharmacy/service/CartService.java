@@ -15,6 +15,7 @@ import com.pharmacy.repository.CartRepository;
 import com.pharmacy.repository.ProductRepository;
 import com.pharmacy.repository.UserRepository;
 import com.pharmacy.validator.CartValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class CartService {
 
@@ -55,6 +57,8 @@ public class CartService {
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
+                    log.debug("Creating new cart for user_id={}", user.getId());
+
                     Cart newCart = Cart.builder()
                             .user(user)
                             .build();
@@ -89,6 +93,12 @@ public class CartService {
             }
         }
         cartRepository.save(cart);
+
+        log.info("Cart merged: user_id={}, cart_id={}, items_count={}",
+                user.getId(),
+                cart.getId(),
+                cart.getCartItems().size());
+
         return cartMapper.toCartResponseDto(cart);
     }
 
@@ -103,10 +113,16 @@ public class CartService {
         Optional<Cart> cart = cartRepository.findByUserId(user.getId());
 
         if (cart.isEmpty()) {
+            log.info("Cart is empty: user_id={}", user.getId());
             return CartResponseDto.builder()
                     .items(List.of())
                     .build();
         }
+
+        log.info("Cart retrieved: user_id={}, cart_id={}, items_count={}",
+                user.getId(),
+                cart.get().getId(),
+                cart.get().getCartItems().size());
 
         return cartMapper.toCartResponseDto(cart.get());
     }

@@ -96,6 +96,7 @@ public class CartItemService {
         return cartItemMapper.toCartItemResponseDto(cartItem);
     }
 
+    @Transactional
     public CartItemResponseDto updateQuantity(Long cartItemId, CartItemUpdateDto dto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
