@@ -1,5 +1,6 @@
 package com.pharmacy.dto.product_dto;
 
+import com.pharmacy.constants.ErrorMessageConstants;
 import com.pharmacy.model.ProductCategory;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -13,21 +14,21 @@ import java.math.BigDecimal;
 @Builder
 public class ProductUpdateDto {
 
-    @NotBlank(message = "Название товара обязательно для заполнения")
-    @Size(max = 100, message = "Название товара не должно превышать 100 символов")
+    @NotBlank(message = ErrorMessageConstants.PRODUCT_NAME_REQUIRED)
+    @Size(max = 100, message = ErrorMessageConstants.PRODUCT_NAME_SIZE)
     private String name;
 
-    @NotNull(message = "Цена обязательна для заполнения")
-    @DecimalMin(value = "0.01", message = "Цена должна быть больше 0")
+    @NotNull(message = ErrorMessageConstants.PRODUCT_PRICE_REQUIRED)
+    @DecimalMin(value = "0.01", message = ErrorMessageConstants.PRODUCT_PRICE_MIN)
     private BigDecimal price;
 
-    @NotNull(message = "Количество товара обязательно для заполнения")
-    @PositiveOrZero(message = "Количество товара не может быть отрицательным")
+    @NotNull(message = ErrorMessageConstants.PRODUCT_STOCK_REQUIRED)
+    @PositiveOrZero(message = ErrorMessageConstants.PRODUCT_STOCK_POSITIVE)
     private Integer stock;
 
-    @NotNull(message = "Категория товара обязательна для заполнения")
+    @NotNull(message = ErrorMessageConstants.PRODUCT_CATEGORY_REQUIRED)
     private ProductCategory category;
 
-    @NotBlank(message = "Инструкция обязательна для заполнения")
+    @NotBlank(message = ErrorMessageConstants.PRODUCT_INSTRUCTION_REQUIRED)
     private String instruction;
 }

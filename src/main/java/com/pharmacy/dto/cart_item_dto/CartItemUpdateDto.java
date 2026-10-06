@@ -1,5 +1,6 @@
 package com.pharmacy.dto.cart_item_dto;
 
+import com.pharmacy.constants.ErrorMessageConstants;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 public class CartItemUpdateDto {
 
-    @NotNull(message = "Количество обязательно для заполнения")
-    @Positive(message = "Количество должно быть больше 0")
+    @NotNull(message = ErrorMessageConstants.PRODUCT_QUANTITY_REQUIRED)
+    @Positive(message = ErrorMessageConstants.PRODUCT_QUANTITY_POSITIVE)
     private Integer quantity;
 }

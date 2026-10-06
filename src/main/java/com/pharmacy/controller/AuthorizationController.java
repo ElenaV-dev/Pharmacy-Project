@@ -1,5 +1,6 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.constants.ApiEndpointConstants;
 import com.pharmacy.dto.user_dto.UserLoginRequestDto;
 import com.pharmacy.dto.user_dto.UserLoginResponseDto;
 import com.pharmacy.dto.user_dto.UserRegisterDto;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(ApiEndpointConstants.AUTH)
 public class AuthorizationController {
     private final UserService userService;
 
@@ -19,12 +20,12 @@ public class AuthorizationController {
         this.userService = userService;
     }
 
-    @PostMapping("/registration")
+    @PostMapping(ApiEndpointConstants.AUTH_REGISTRATION)
     public UserLoginResponseDto registration(@Valid @RequestBody UserRegisterDto dto) {
         return userService.registration(dto);
     }
 
-    @PostMapping("/login")
+    @PostMapping(ApiEndpointConstants.AUTH_LOGIN)
     public UserLoginResponseDto login(@Valid @RequestBody UserLoginRequestDto dto) {
         return userService.login(dto);
     }

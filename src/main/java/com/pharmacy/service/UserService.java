@@ -1,5 +1,7 @@
 package com.pharmacy.service;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.SecurityConstants;
 import com.pharmacy.dto.user_dto.*;
 import com.pharmacy.exception.EntityNotFoundException;
 import com.pharmacy.mapper.UserMapper;
@@ -97,7 +99,8 @@ public class UserService {
 
     private User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.USER_NOT_FOUND_BY_ID, id)));
     }
 
     private UserRole getUserRole(Authentication authentication) {
@@ -105,6 +108,6 @@ public class UserService {
                 .iterator()
                 .next()
                 .getAuthority()
-                .replace("ROLE_", ""));
+                .replace(SecurityConstants.ROLE_PREFIX, ""));
     }
 }

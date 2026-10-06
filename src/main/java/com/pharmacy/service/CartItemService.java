@@ -1,5 +1,6 @@
 package com.pharmacy.service;
 
+import com.pharmacy.constants.ErrorMessageConstants;
 import com.pharmacy.dto.cart_item_dto.CartItemRequestDto;
 import com.pharmacy.dto.cart_item_dto.CartItemResponseDto;
 import com.pharmacy.dto.cart_item_dto.CartItemUpdateDto;
@@ -60,7 +61,8 @@ public class CartItemService {
                 });
 
         Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + dto.getProductId()));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.PRODUCT_NOT_FOUND_BY_ID, dto.getProductId())));
 
         Integer quantity = dto.getQuantity();
         cartItemValidator.validateQuantity(quantity, product);
@@ -128,11 +130,13 @@ public class CartItemService {
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(
+                       String.format(ErrorMessageConstants.USER_NOT_FOUND_BY_EMAIL, email)));
     }
 
     private CartItem getCartItemById(Long id) {
         return cartItemRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cart item not found with id " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.CART_ITEM_NOT_FOUND_BY_ID, id)));
     }
 }

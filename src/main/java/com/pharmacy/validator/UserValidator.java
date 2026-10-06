@@ -1,5 +1,7 @@
 package com.pharmacy.validator;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.ValidationFieldConstants;
 import com.pharmacy.dto.user_dto.UserCreateDto;
 import com.pharmacy.dto.user_dto.UserRegisterDto;
 import com.pharmacy.dto.user_dto.UserUpdateDto;
@@ -18,19 +20,25 @@ public class UserValidator {
 
     public void validateRegisterDto(UserRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new ValidationException("email", "Пользователь с таким email уже существует");
+            throw new ValidationException(
+                    ValidationFieldConstants.EMAIL,
+                    String.format(ErrorMessageConstants.USER_EXISTS_BY_EMAIL, dto.getEmail()));
         }
     }
 
     public void validateCreateDto(UserCreateDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new ValidationException("email", "Пользователь с таким email уже существует");
+            throw new ValidationException(
+                    ValidationFieldConstants.EMAIL,
+                    String.format(ErrorMessageConstants.USER_EXISTS_BY_EMAIL, dto.getEmail()));
         }
     }
 
     public void validateUpdateDto(UserUpdateDto dto, Long id) {
         if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
-            throw new ValidationException("email", "Пользователь с таким email уже существует");
+            throw new ValidationException(
+                    ValidationFieldConstants.EMAIL,
+                    String.format(ErrorMessageConstants.USER_EXISTS_BY_EMAIL, dto.getEmail()));
         }
     }
 }

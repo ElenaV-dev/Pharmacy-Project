@@ -1,5 +1,7 @@
 package com.pharmacy.config;
 
+import com.pharmacy.constants.ApiEndpointConstants;
+import com.pharmacy.model.UserRole;
 import com.pharmacy.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,25 +37,38 @@ public class SecurityConfig {
                 .cors(cors -> {
                 })
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET,"/api/product/search").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/product/*").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/product/categories/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.PRODUCT_SEARCH_PATH).permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/product/**").hasAnyRole("PHARMACIST", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.PRODUCT_BY_ID_PATH).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.PRODUCT_CATEGORIES_PATH).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/cart/**").hasAnyRole("CLIENT", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, ApiEndpointConstants.PRODUCT_ALL_PATHS)
+                        .hasAnyRole(UserRole.PHARMACIST.name(), UserRole.ADMIN.name())
 
-                        .requestMatchers(HttpMethod.GET, "/api/orders").hasAnyRole("CLIENT", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyRole("CLIENT", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, ApiEndpointConstants.PRODUCT_ALL_PATHS)
+                        .hasAnyRole(UserRole.PHARMACIST.name(), UserRole.ADMIN.name())
 
-                        .requestMatchers("/api/user/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, ApiEndpointConstants.PRODUCT_ALL_PATHS)
+                        .hasAnyRole(UserRole.PHARMACIST.name(), UserRole.ADMIN.name())
 
-                        .requestMatchers(HttpMethod.GET, "/api/orders/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.CART_ALL_PATHS)
+                        .hasAnyRole(UserRole.CLIENT.name(), UserRole.ADMIN.name())
 
-                        .requestMatchers("/api/auth/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.ORDERS)
+                        .hasAnyRole(UserRole.CLIENT.name(), UserRole.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.POST, ApiEndpointConstants.ORDERS)
+                        .hasAnyRole(UserRole.CLIENT.name(), UserRole.ADMIN.name())
+
+                        .requestMatchers(ApiEndpointConstants.USER_ALL_PATHS).hasRole(UserRole.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.GET, ApiEndpointConstants.ORDERS_ADMIN_PATH)
+                        .hasRole(UserRole.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.PUT, ApiEndpointConstants.ORDERS_ALL_PATHS)
+                        .hasRole(UserRole.ADMIN.name())
+
+                        .requestMatchers(ApiEndpointConstants.AUTH_ALL_PATHS).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -1,5 +1,6 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.constants.ErrorMessageConstants;
 import com.pharmacy.dto.error_dto.ErrorResponseDto;
 import com.pharmacy.exception.EntityNotFoundException;
 import com.pharmacy.exception.ValidationException;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
         log.warn("Validation failed: {}", errors);
 
         ErrorResponseDto response = ErrorResponseDto.builder()
-                .message("Validation failed")
+                .message(ErrorMessageConstants.VALIDATION_FAILED)
                 .fieldErrors(errors)
                 .build();
 
@@ -75,13 +76,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
-
     public ResponseEntity<ErrorResponseDto> handleAuthenticationException(AuthenticationException ex) {
 
         log.warn("Authentication failed: {}", ex.getMessage());
 
         ErrorResponseDto response = ErrorResponseDto.builder()
-                .message("Неверный email или пароль")
+                .message(ErrorMessageConstants.INVALID_CREDENTIALS)
                 .fieldErrors(Map.of())
                 .build();
 
@@ -89,4 +89,6 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
+
+
 }

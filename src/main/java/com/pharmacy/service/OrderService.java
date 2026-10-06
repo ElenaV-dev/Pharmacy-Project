@@ -1,5 +1,7 @@
 package com.pharmacy.service;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.OrderConstants;
 import com.pharmacy.dto.order_dto.OrderAdminResponseDto;
 import com.pharmacy.dto.order_dto.OrderClientResponseDto;
 import com.pharmacy.dto.order_dto.OrderStatusUpdateDto;
@@ -56,7 +58,8 @@ public class OrderService {
         User user = getUserByEmail(email);
 
         Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Cart not found with user id " + user.getId()));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.CART_NOT_FOUND_BY_USER_ID, user.getId())));
 
         List<CartItem> cartItems = cart.getCartItems();
         orderValidator.validateCartNotEmpty(cartItems);
@@ -72,7 +75,7 @@ public class OrderService {
         for (CartItem items : cartItems) {
             Product product = productRepository.findById(items.getProduct().getId())
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "Product not found: " + items.getProduct().getName()));
+                            String.format(ErrorMessageConstants.PRODUCT_NOT_FOUND_BY_ID, items.getProduct().getId())));
 
             int quantity = items.getQuantity();
             cartItemValidator.validateQuantity(quantity, product);
@@ -118,7 +121,8 @@ public class OrderService {
     public OrderAdminResponseDto updateStatus(Long id, OrderStatusUpdateDto dto) {
 
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.ORDER_NOT_FOUND_BY_ID, id)));
 
         OrderStatus currentStatus = order.getStatus();
         OrderStatus newStatus = dto.getStatus();
@@ -128,7 +132,7 @@ public class OrderService {
             for (OrderItem item : order.getOrderItems()) {
                 Product product = productRepository.findById(item.getProduct().getId())
                         .orElseThrow(() -> new EntityNotFoundException(
-                                "Product not found: " + item.getProduct().getName()));
+                                String.format(ErrorMessageConstants.PRODUCT_NOT_FOUND_BY_ID, item.getProduct().getId())));
 
                 product.setStock(product.getStock() + item.getQuantity());
                 productRepository.save(product);
@@ -141,7 +145,7 @@ public class OrderService {
 
         log.info("Order status updated: order_id={}, old_status={}, new_status={}",
                 id, currentStatus, newStatus);
-        
+
         return orderMapper.toOrderAdminResponseDto(order);
     }
 
@@ -166,7 +170,7 @@ public class OrderService {
             int randomNumber = ThreadLocalRandom.current()
                     .nextInt(1, 1_000_000);
 
-            orderNumber = String.format("ORD-%s-%06d", date, randomNumber);
+            orderNumber = String.format(OrderConstants.ORDER_NUMBER_FORMAT, date, randomNumber);
         } while (orderRepository.existsByOrderNumber(orderNumber));
 
         return orderNumber;
@@ -174,6 +178,7 @@ public class OrderService {
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        String.format(ErrorMessageConstants.USER_NOT_FOUND_BY_EMAIL, email)));
     }
 }

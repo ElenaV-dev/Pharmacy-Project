@@ -1,5 +1,7 @@
 package com.pharmacy.security;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.SecurityConstants;
 import com.pharmacy.repository.UserRepository;
 import com.pharmacy.model.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,13 +22,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(
+                       String.format(ErrorMessageConstants.USER_NOT_FOUND_BY_EMAIL, email)));
 
         return org.springframework.security.core.userdetails.User
                 .builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities("ROLE_" + user.getRole().name())
+                .authorities(SecurityConstants.ROLE_PREFIX + user.getRole().name())
                 .build();
     }
 }

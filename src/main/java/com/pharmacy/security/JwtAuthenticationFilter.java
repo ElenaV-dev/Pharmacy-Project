@@ -1,5 +1,7 @@
 package com.pharmacy.security;
 
+import com.pharmacy.constants.HttpHeaderConstants;
+import com.pharmacy.constants.JwtConstants;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,14 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(HttpHeaderConstants.AUTHORIZATION);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(JwtConstants.BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = authHeader.substring(7);
+        String jwt = authHeader.substring(JwtConstants.BEARER_PREFIX.length());
 
         try {
             String username = jwtService.extractUsername(jwt);

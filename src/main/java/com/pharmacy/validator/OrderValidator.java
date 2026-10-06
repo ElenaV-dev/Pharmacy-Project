@@ -1,5 +1,7 @@
 package com.pharmacy.validator;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.ValidationFieldConstants;
 import com.pharmacy.exception.ValidationException;
 import com.pharmacy.model.CartItem;
 import com.pharmacy.model.OrderStatus;
@@ -12,7 +14,9 @@ public class OrderValidator {
 
     public void validateCartNotEmpty(List<CartItem> cartItems) {
         if (cartItems.isEmpty()) {
-            throw new ValidationException("cart", "Cannot create order from empty cart");
+            throw new ValidationException(
+                    ValidationFieldConstants.CART,
+                    ErrorMessageConstants.CART_EMPTY);
         }
     }
 

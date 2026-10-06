@@ -1,5 +1,6 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.constants.ApiEndpointConstants;
 import com.pharmacy.dto.order_dto.OrderAdminResponseDto;
 import com.pharmacy.dto.order_dto.OrderClientResponseDto;
 import com.pharmacy.dto.order_dto.OrderStatusUpdateDto;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping(ApiEndpointConstants.ORDERS)
 public class OrderController {
 
     private final OrderService orderService;
@@ -29,12 +30,12 @@ public class OrderController {
         return orderService.getCurrentUserOrders();
     }
 
-    @GetMapping("/admin")
+    @GetMapping(ApiEndpointConstants.ORDERS_ADMIN)
     public List<OrderAdminResponseDto> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping(ApiEndpointConstants.ORDERS_STATUS)
     public OrderAdminResponseDto updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody OrderStatusUpdateDto dto) {

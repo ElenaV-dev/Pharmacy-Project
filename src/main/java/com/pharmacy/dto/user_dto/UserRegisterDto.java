@@ -1,5 +1,7 @@
 package com.pharmacy.dto.user_dto;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.ValidationPatternConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,19 +15,19 @@ import lombok.*;
 @Builder
 public class UserRegisterDto {
 
-    @NotBlank(message = "Имя обязательно для заполнения")
-    @Size(max = 50, message = "Имя не должно превышать 50 символов")
-    @Pattern(regexp = "^[a-zA-Zа-яА-ЯёЁ\\s-]+$", message = "Имя должно содержать только буквы")
+    @NotBlank(message = ErrorMessageConstants.USER_NAME_REQUIRED)
+    @Size(max = 50, message = ErrorMessageConstants.USER_NAME_SIZE)
+    @Pattern(regexp = ValidationPatternConstants.USER_NAME, message = ErrorMessageConstants.USER_NAME_PATTERN)
     private String name;
 
-    @NotBlank(message = "Email обязателен для заполнения")
-    @Email(message = "Введите корректный адрес электронной почты")
-    @Size(max = 100, message = "Email не должен превышать 100 символов")
+    @NotBlank(message = ErrorMessageConstants.USER_EMAIL_REQUIRED)
+    @Email(message = ErrorMessageConstants.USER_EMAIL_VALID)
+    @Size(max = 100, message = ErrorMessageConstants.USER_EMAIL_SIZE)
     private String email;
 
-    @NotBlank(message = "Пароль обязателен для заполнения")
-    @Size(min = 8, message = "Пароль должен состоять минимум из 8 символов")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
-            message = "Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру")
+    @NotBlank(message = ErrorMessageConstants.USER_PASSWORD_REQUIRED)
+    @Size(min = 8, message = ErrorMessageConstants.USER_PASSWORD_SIZE)
+    @Pattern(regexp = ValidationPatternConstants.USER_PASSWORD,
+            message = ErrorMessageConstants.USER_PASSWORD_PATTERN)
     private String password;
 }

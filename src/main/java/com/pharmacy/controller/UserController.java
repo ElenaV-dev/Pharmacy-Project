@@ -1,5 +1,6 @@
 package com.pharmacy.controller;
 
+import com.pharmacy.constants.ApiEndpointConstants;
 import com.pharmacy.dto.user_dto.UserCreateDto;
 import com.pharmacy.dto.user_dto.UserResponseDto;
 import com.pharmacy.dto.user_dto.UserUpdateDto;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping(ApiEndpointConstants.USER)
 public class UserController {
 
     private final UserService userService;
@@ -29,7 +30,7 @@ public class UserController {
         return userService.createUser(dto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(ApiEndpointConstants.USER_BY_ID)
     public UserResponseDto updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserUpdateDto dto) {
@@ -37,7 +38,7 @@ public class UserController {
         return userService.updateUser(id, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(ApiEndpointConstants.USER_BY_ID)
     public void deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
     }

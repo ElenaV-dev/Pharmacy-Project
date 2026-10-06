@@ -1,5 +1,7 @@
 package com.pharmacy.service;
 
+import com.pharmacy.constants.ErrorMessageConstants;
+import com.pharmacy.constants.ProductConstants;
 import com.pharmacy.dto.product_dto.*;
 import com.pharmacy.exception.EntityNotFoundException;
 import com.pharmacy.mapper.ProductMapper;
@@ -43,9 +45,9 @@ public class ProductService {
     public List<CategoryResponseDto> getCategories() {
         return Arrays.stream(ProductCategory.values())
                 .map(category -> switch (category) {
-                    case MEDICINE -> new CategoryResponseDto(category, "Лекарственные препараты");
-                    case VITAMIN -> new CategoryResponseDto(category, "Витамины и БАДы");
-                    case DEVICE -> new CategoryResponseDto(category, "Медицинские приборы");
+                    case MEDICINE -> new CategoryResponseDto(category, ProductConstants.MEDICINE_CATEGORY);
+                    case VITAMIN -> new CategoryResponseDto(category, ProductConstants.VITAMIN_CATEGORY);
+                    case DEVICE -> new CategoryResponseDto(category, ProductConstants.DEVICE_CATEGORY);
                 })
                 .toList();
     }
@@ -84,6 +86,7 @@ public class ProductService {
 
     private Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format(ErrorMessageConstants.PRODUCT_NOT_FOUND_BY_ID, id)));
     }
 }

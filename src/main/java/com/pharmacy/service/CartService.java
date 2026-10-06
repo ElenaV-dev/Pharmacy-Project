@@ -1,5 +1,6 @@
 package com.pharmacy.service;
 
+import com.pharmacy.constants.ErrorMessageConstants;
 import com.pharmacy.dto.cart_dto.CartRequestDto;
 import com.pharmacy.dto.cart_dto.CartResponseDto;
 import com.pharmacy.dto.cart_item_dto.CartItemRequestDto;
@@ -66,7 +67,7 @@ public class CartService {
 
             Product product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException(
-                            "Product not found: " + itemDto.getProductId()));
+                            String.format(ErrorMessageConstants.PRODUCT_NOT_FOUND_BY_ID, itemDto.getProductId())));
 
             Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndProductId(
                     cart.getId(), product.getId());
@@ -122,6 +123,7 @@ public class CartService {
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        String.format(ErrorMessageConstants.USER_NOT_FOUND_BY_EMAIL, email)));
     }
 }
