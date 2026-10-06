@@ -7,6 +7,8 @@ public final class ErrorMessageConstants {
 
     public static final String VALIDATION_FAILED = "Ошибка валидации";
     public static final String INVALID_CREDENTIALS = "Неверный email или пароль";
+    public static final String ACCESS_DENIED = "Доступ запрещен";
+    public static final String INTERNAL_SERVER_ERROR = "Внутренняя ошибка сервера";
 
     public static final String USER_NAME_REQUIRED = "Имя обязательно для заполнения";
     public static final String USER_NAME_SIZE = "Имя не должно превышать 50 символов";
@@ -43,9 +45,12 @@ public final class ErrorMessageConstants {
     public static final String ORDER_STATUS_REQUIRED = "Статус заказа обязателен для заполнения";
 
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: %d";
+    public static final String ORDER_STATUS_CANNOT_BE_CHANGED = "Статус заказа нельзя изменить";
+    public static final String ORDER_STATUS_INVALID = "Недопустимый статус заказа";
 
     public static final String CART_NOT_FOUND_BY_USER_ID = "Cart not found with user id: %d";
     public static final String CART_EMPTY = "Невозможно создать заказ: корзина пуста";
 
     public static final String CART_ITEM_NOT_FOUND_BY_ID = "Cart item not found with id: %d";
+    public static final String CART_ITEM_ACCESS_DENIED = "Cart item does not belong to current user";
 }

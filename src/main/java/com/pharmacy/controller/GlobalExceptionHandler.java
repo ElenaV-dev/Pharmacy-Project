@@ -7,6 +7,7 @@ import com.pharmacy.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -90,5 +91,34 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
+            AccessDeniedException ex) {
 
+        log.warn("Access denied: {}", ex.getMessage());
+
+        ErrorResponseDto response = ErrorResponseDto.builder()
+                .message(ErrorMessageConstants.ACCESS_DENIED)
+                .fieldErrors(Map.of())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleUnexpectedException(Exception ex) {
+
+        log.error("Unexpected error", ex);
+
+        ErrorResponseDto response = ErrorResponseDto.builder()
+                .message(ErrorMessageConstants.INTERNAL_SERVER_ERROR)
+                .fieldErrors(Map.of())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
 }

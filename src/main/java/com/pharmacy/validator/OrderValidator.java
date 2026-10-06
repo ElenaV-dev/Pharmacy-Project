@@ -22,11 +22,15 @@ public class OrderValidator {
 
     public void validateOrderTransition(OrderStatus currentStatus, OrderStatus newStatus) {
         if (currentStatus != OrderStatus.PROCESSING) {
-            throw new IllegalStateException("Order status cannot be changed");
+            throw new ValidationException(
+                    ValidationFieldConstants.STATUS,
+                    ErrorMessageConstants.ORDER_STATUS_CANNOT_BE_CHANGED);
         }
 
         if (newStatus != OrderStatus.COMPLETED && newStatus != OrderStatus.CANCELED) {
-            throw new IllegalArgumentException("Invalid order status");
+            throw new ValidationException(
+                    ValidationFieldConstants.STATUS,
+                    ErrorMessageConstants.ORDER_STATUS_INVALID);
         }
     }
 }
