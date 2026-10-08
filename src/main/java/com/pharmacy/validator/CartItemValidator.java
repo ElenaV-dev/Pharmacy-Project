@@ -6,7 +6,6 @@ import com.pharmacy.exception.ValidationException;
 import com.pharmacy.model.CartItem;
 import com.pharmacy.model.Product;
 import com.pharmacy.model.User;
-import com.pharmacy.repository.CartItemRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
