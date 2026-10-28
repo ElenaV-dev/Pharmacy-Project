@@ -13,7 +13,7 @@ function ClientPage({ token, cartItems, onUpdateQuantity, onRemove }) {
         const fetchOrders = async () => {
             setLoadingOrders(true);
             try {
-                const response = await fetch('http://localhost:8080/api/orders', {
+                const response = await fetch('/api/orders', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -51,7 +51,7 @@ function ClientPage({ token, cartItems, onUpdateQuantity, onRemove }) {
         if (item.stock !== undefined && item.stock !== null && newQuantity > item.stock) {
             setStockErrors(prev => ({
                 ...prev,
-                [item.productId]: "Недостаточно на складе, выключаем можете приобрести только такое количество товара"
+                [item.productId]: "Недостаточно на складе, вы можете приобрести только такое количество товара"
             }))
         } else {
             setStockErrors(prev => {
@@ -66,7 +66,7 @@ function ClientPage({ token, cartItems, onUpdateQuantity, onRemove }) {
     const handleCheckout = async () => {
         try {
             setStockErrors({})
-            const response = await fetch('http://localhost:8080/api/orders', {
+            const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             })

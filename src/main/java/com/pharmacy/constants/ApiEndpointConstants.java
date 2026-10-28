@@ -38,7 +38,4 @@ public final class ApiEndpointConstants {
     public static final String ORDERS_ALL_PATHS = ORDERS + "/**";
 
     public static final String ORDERS_ADMIN_PATH = ORDERS + "/admin";
-
-
-
 }

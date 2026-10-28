@@ -37,7 +37,7 @@ function PharmacistPage({ token, products, setProducts }) {
         if (!window.confirm('Вы уверены, что хотите удалить этот товар из базы данных?')) return
 
         try {
-            const response = await fetch(`http://localhost:8080/api/product/${id}`, {
+            const response = await fetch(`/api/product/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -61,8 +61,8 @@ function PharmacistPage({ token, products, setProducts }) {
 
             const isEdit = editingProductId !== null
             const url = isEdit
-                ? `http://localhost:8080/api/product/${editingProductId}`
-                : 'http://localhost:8080/api/product'
+                ? `/api/product/${editingProductId}`
+                : '/api/product'
             const method = isEdit ? 'PUT' : 'POST'
             const currentCategory = products[0]?.category || 'MEDICINE'
 

@@ -33,7 +33,7 @@ function App() {
 
     useEffect(() => {
         if (token && userRole === 'CLIENT') {
-            fetch('http://localhost:8080/api/cart', {
+            fetch('/api/cart', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -57,7 +57,7 @@ function App() {
 
     useEffect(() => {
         if (!token) {
-            fetch('http://localhost:8080/api/products', {
+            fetch('/api/product', {
                 method: 'GET'
             })
             .then(res => res.ok ? res.json() : [])
@@ -71,7 +71,7 @@ function App() {
     const syncQuantityWithServer = async (cartItemId, newQuantity) => {
         if (!token || userRole !== 'CLIENT') return null
         try {
-            const response = await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+            const response = await fetch(`/api/cart/items/${cartItemId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ function App() {
     const deleteFromServer = async (cartItemId) => {
         if (!token || userRole !== 'CLIENT') return
         try {
-            await fetch(`http://localhost:8080/api/cart/items/${cartItemId}`, {
+            await fetch(`/api/cart/items/${cartItemId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -115,7 +115,7 @@ function App() {
 
         if (token && userRole === 'CLIENT') {
             try {
-                const response = await fetch('http://localhost:8080/api/cart/items', {
+                const response = await fetch('/api/cart/items', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ function App() {
                     productId: item.id,
                     quantity: item.quantity
                 }))
-                await fetch('http://localhost:8080/api/cart/merge', {
+                await fetch('/api/cart/merge', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

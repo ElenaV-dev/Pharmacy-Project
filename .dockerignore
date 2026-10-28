@@ -1,0 +1,9 @@
+
+target/*
+!target/pharmacy-0.0.1.jar
+.git/
+.idea/
+*.db
+data/
+.env
+

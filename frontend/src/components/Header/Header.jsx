@@ -13,7 +13,7 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
 
     useEffect(() => {
         if (isMenuOpen && categories.length === 0) {
-            fetch('http://localhost:8080/api/product/categories')
+            fetch('/api/product/categories')
                 .then(res => res.json())
                 .then(data => setCategories(data))
                 .catch(err => console.error("Ошибка загрузки категорий:", err))
@@ -32,7 +32,7 @@ function Header({ setProducts, selectedProductId, isCartOpen, cartCount, token, 
 
     const handleCategoryClick = async (categoryEnum) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/product/categories/${categoryEnum}`)
+            const response = await fetch(`/api/product/categories/${categoryEnum}`)
             const data = await response.json()
             onCategorySelect(data)
             setIsMenuOpen(false)

@@ -21,7 +21,7 @@ function AdminPage({ token }) {
         const fetchUsers = async () => {
             try {
                 setLoadingUsers(true)
-                const response = await fetch('http://localhost:8080/api/user', {
+                const response = await fetch('/api/user', {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
@@ -47,7 +47,7 @@ function AdminPage({ token }) {
             const fetchAllOrders = async () => {
                 setLoadingOrders(true)
                 try {
-                    const response = await fetch('http://localhost:8080/api/orders/admin', {
+                    const response = await fetch('/api/orders/admin', {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -105,7 +105,7 @@ function AdminPage({ token }) {
         if (!window.confirm('Вы уверены, что хотите удалить этого пользователя?')) return
 
         try {
-            const response = await fetch(`http://localhost:8080/api/user/${id}`, {
+            const response = await fetch(`/api/user/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -126,7 +126,7 @@ function AdminPage({ token }) {
         setGeneralError('')
 
         const isEdit = editingUserId !== null
-        const url = isEdit ? `http://localhost:8080/api/user/${editingUserId}` : 'http://localhost:8080/api/user'
+        const url = isEdit ? `/api/user/${editingUserId}` : '/api/user'
         const method = isEdit ? 'PUT' : 'POST'
 
         try {
@@ -163,7 +163,7 @@ function AdminPage({ token }) {
 
     const handleUpdateStatus = async (orderId, newStatus) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
+            const response = await fetch(`/api/orders/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

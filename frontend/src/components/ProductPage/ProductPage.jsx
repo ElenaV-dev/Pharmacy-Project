@@ -10,7 +10,7 @@ function ProductPage({ id, onAddToCart }) {
             try {
                 setLoading(true)
 
-                const response = await fetch(`http://localhost:8080/api/product/${id}`)
+                const response = await fetch(`/api/product/${id}`)
                 const data = await response.json()
 
                 setProduct(data)

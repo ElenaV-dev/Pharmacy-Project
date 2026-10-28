@@ -1,0 +1,21 @@
+
+services:
+  pharmacy:
+    build: .
+    image: pharmacy-app
+    container_name: pharmacy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:sqlite:/app/data/pharmacy.db
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build: ./frontend
+    container_name: pharmacy-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - pharmacy
