@@ -22,7 +22,7 @@ A full-stack pharmacy web application built with Spring Boot and React. The appl
 - Java
 - Spring Boot
 - Spring Web (REST API)
-- Spring Data JPA / Hibernate
+- Spring Data JPA 
 - Spring Security
 - JWT authentication
 - SQLite
@@ -32,7 +32,6 @@ A full-stack pharmacy web application built with Spring Boot and React. The appl
 - Maven
 
 ### Frontend
-- JavaScript
 - React
 - Vite
 - HTML / CSS
